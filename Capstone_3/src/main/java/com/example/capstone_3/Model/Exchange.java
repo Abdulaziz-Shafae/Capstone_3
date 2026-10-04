@@ -57,13 +57,14 @@ public class Exchange {
     private LocalDateTime completedAt;
 
 
-/*    // LearningRequest 1 : 0..1 Exchange
+   // LearningRequest 1 : 0..1 Exchange
     // Exchange is the child
+
     @NotNull(message = "The learning request cant be null")
     @OneToOne
     @JoinColumn(name = "request_id", unique = true)
     @JsonIgnore
-    private LearningRequest learningRequest;
+    private LearningRequest learningRequest; //سويتها
 
 
     // SkillOffer 1 : Many Exchange
@@ -72,29 +73,29 @@ public class Exchange {
     @ManyToOne
     @JoinColumn(name = "offer_id")
     @JsonIgnore
-    private SkillOffer skillOffer;
+    private SkillOffer skillOffer;//سويتها
 
 
     // Exchange 1 : 1 Agreement
     // Exchange is the parent
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "exchange")
-    private Agreement agreement;
+//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "exchange")
+//    private Agreement agreement;
 
 
     // Exchange 1 : Many SessionParticipant
     // Exchange is the parent
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-    private Set<SessionParticipant> sessionParticipants;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+//    private Set<SessionParticipant> sessionParticipants;
 
 
     // Exchange 1 : Many TokenTransaction
     // Exchange is the parent
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-    private Set<TokenTransaction> tokenTransactions;
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+//    private Set<TokenTransaction> tokenTransactions;
 
 
     // Exchange 1 : Many Review
     // Exchange is the parent
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-    private Set<Review> reviews;*/
+//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+//    private Set<Review> reviews;
 }
