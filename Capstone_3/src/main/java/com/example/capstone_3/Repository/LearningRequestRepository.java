@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LearningRequestRepository extends JpaRepository<LearningRequest,Integer> {
-  LearningRequest findAllById(Integer id);
+  LearningRequest findLearningRequestById(Integer id);
 
 
 
