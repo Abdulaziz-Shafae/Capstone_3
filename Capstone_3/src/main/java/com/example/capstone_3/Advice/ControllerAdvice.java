@@ -1,8 +1,8 @@
 package com.example.capstone_3.Advice;
 
 
-import com.example.exercisew8d4.Api.ApiException;
-import com.example.exercisew8d4.Api.ApiResponse;
+import com.example.capstone_3.Api.ApiException;
+import com.example.capstone_3.Api.ApiResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
