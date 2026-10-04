@@ -21,37 +21,44 @@ public class IndividualProfile {
     private Integer id;
 
 
-    @NotNull(message = "The name cant be null")
+/*    @NotNull(message = "The name cant be null")
     @NotEmpty(message = "The name cant be empty")
     @NotBlank(message = "The name cant be blank")
     @Size(max = 100, message = "Name must not exceed 100 characters")
+    */
     @Column(columnDefinition = "VARCHAR(100) not null")
     private String name;
 
 
-    @NotNull(message = "The phone cant be null")
+/*    @NotNull(message = "The phone cant be null")
     @NotEmpty(message = "The phone cant be empty")
     @NotBlank(message = "The phone cant be blank")
     @Pattern(
             regexp = "^05[0-9]{8}$",
             message = "Phone must be 10 digits and start with 05"
-    )
+    )*/
     @Check(constraints = "phone REGEXP '^05[0-9]{8}$'")
     @Column(columnDefinition = "VARCHAR(10) not null unique")
     private String phone;
 
 
+/*
     @Size(max = 500, message = "Bio must not exceed 500 characters")
+*/
     @Column(columnDefinition = "VARCHAR(500)")
     private String bio;
 
 
+/*
     @Size(max = 100, message = "City must not exceed 100 characters")
+*/
     @Column(columnDefinition = "VARCHAR(100)")
     private String city;
 
 
+/*
     @Size(max = 500, message = "Profile image must not exceed 500 characters")
+*/
     @Column(columnDefinition = "VARCHAR(500)")
     private String profileImage;
 
