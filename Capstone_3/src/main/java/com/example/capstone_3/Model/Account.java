@@ -23,48 +23,50 @@ public class Account {
     private Integer id;
 
 
-    @NotBlank(message = "The email cant be blank")
+    /*@NotBlank(message = "The email cant be blank")
     @NotEmpty(message = "The email cant be empty")
     @Email(message = "Email must be valid")
-    @Size(max = 150, message = "Email must not exceed 150 characters")
+    @Size(max = 150, message = "Email must not exceed 150 characters")*/
     @Column(columnDefinition = "VARCHAR(150) not null unique")
     private String email;
 
 
-    @NotBlank(message = "The password cant be blank")
+ /*   @NotBlank(message = "The password cant be blank")
     @NotEmpty(message = "The password cant be empty")
-    @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")
+    @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters")*/
     @Column(columnDefinition = "VARCHAR(255) not null")
     private String password;
 
 
-    @NotBlank(message = "The account type cant be blank")
+/*    @NotBlank(message = "The account type cant be blank")
     @Pattern(
             regexp = "^(INDIVIDUAL|COMPANY|ADMIN)$",
             message = "Account type must be INDIVIDUAL, COMPANY, or ADMIN"
-    )
+    )*/
     @Check(constraints = "account_type IN ('INDIVIDUAL', 'COMPANY', 'ADMIN')")
     @Column(columnDefinition = "VARCHAR(10) not null")
     private String accountType;
 
 
-    @NotNull(message = "The token balance cant be null")
-    @Min(value = 0, message = "Token balance cant be negative")
+   /* @NotNull(message = "The token balance cant be null")
+    @Min(value = 0, message = "Token balance cant be negative")*/
     @Column(columnDefinition = "INT DEFAULT 3")
     private Integer tokenBalance = 3;
 
 
-    @NotBlank(message = "The status cant be blank")
+  /*  @NotBlank(message = "The status cant be blank")
     @Pattern(
             regexp = "^(ACTIVE|SUSPENDED|BLOCKED)$",
             message = "Status must be ACTIVE, SUSPENDED, or BLOCKED"
-    )
+    )*/
     @Check(constraints = "status IN ('ACTIVE', 'SUSPENDED', 'BLOCKED')")
     @Column(columnDefinition = "VARCHAR(9) not null")
     private String status = "ACTIVE";
 
 
+/*
     @NotNull(message = "Email verified cant be null")
+*/
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean emailVerified = false;
 
