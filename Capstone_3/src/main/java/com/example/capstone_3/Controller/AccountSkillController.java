@@ -37,4 +37,14 @@ public class AccountSkillController {
         accountSkillService.deleteAccountSkill(id);
         return ResponseEntity.status(200).body(new ApiResponse("Account skill deleted"));
     }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<?> getSkillsByAccount(@PathVariable Integer accountId) {
+        return ResponseEntity.status(200).body(accountSkillService.getSkillsByAccount(accountId));
+    }
+
+    @GetMapping("/verified/{accountId}")
+    public ResponseEntity<?> getVerifiedSkillsOfAccount(@PathVariable Integer accountId) {
+        return ResponseEntity.status(200).body(accountSkillService.getVerifiedSkillsOfAccount(accountId));
+    }
 }

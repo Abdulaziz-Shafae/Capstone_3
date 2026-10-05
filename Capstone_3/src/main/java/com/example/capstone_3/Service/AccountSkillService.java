@@ -1,6 +1,7 @@
 package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
+import com.example.capstone_3.DtoOut.AccountSkillDtoOut;
 import com.example.capstone_3.Model.Account;
 import com.example.capstone_3.Model.AccountSkill;
 import com.example.capstone_3.Model.Skill;
@@ -10,6 +11,7 @@ import com.example.capstone_3.Repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -64,6 +66,54 @@ public class AccountSkillService {
             throw new ApiException("Account skill not found");
         }
         accountSkillRepository.delete(accountSkill);
+    }
+
+
+    //endpoint 8 done
+    public List<AccountSkillDtoOut>getSkillsByAccount(Integer accountId){
+      Account account=accountRepository.findAccountById(accountId);
+      if(account==null){
+          throw new ApiException("Account not found");
+      }
+
+      List<AccountSkill>accountSkills=accountSkillRepository.findAllByAccount(account);
+      List<AccountSkillDtoOut>result=new ArrayList<>();
+
+      for(AccountSkill a: accountSkills ){
+          AccountSkillDtoOut dto = new AccountSkillDtoOut();
+          dto.setId(a.getId());
+          dto.setSkillName(a.getSkill().getName());
+          dto.setCategory(a.getSkill().getCategory());
+          dto.setLevel(a.getLevel());
+          dto.setVerified(a.getVerified());
+
+          result.add(dto);
+      }
+      return result;
+
+
+    }
+
+    //endPoint 9 done
+    public List<AccountSkillDtoOut>getVerifiedSkillsOfAccount(Integer accountId){
+     Account account=accountRepository.findAccountById(accountId);
+     if(account==null){
+         throw new ApiException("Account not found");
+     }
+
+     List<AccountSkill>accountSkills=accountSkillRepository.findAllByAccountAndVerified(account,true);
+        List<AccountSkillDtoOut>result=new ArrayList<>();
+        for(AccountSkill a:accountSkills){
+            AccountSkillDtoOut dto=new AccountSkillDtoOut();
+            dto.setId(a.getId());
+            dto.setLevel(a.getLevel());
+            dto.setVerified(a.getVerified());
+            dto.setSkillName(a.getSkill().getName());
+            dto.setCategory(a.getSkill().getCategory());
+            result.add(dto);
+        }
+
+        return result;
     }
 
 
