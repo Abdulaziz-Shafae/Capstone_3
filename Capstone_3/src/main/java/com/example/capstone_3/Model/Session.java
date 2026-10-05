@@ -13,15 +13,14 @@ import lombok.Setter;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "mode IN ('ONLINE', 'IN_PERSON')")
-@Check(constraints = "status IN ('SCHEDULED', 'COMPLETED', 'CANCELLED')")
+@Check(constraints = "mode IN ('ONLINE', 'IN_PERSON') AND status IN ('SCHEDULED', 'COMPLETED', 'CANCELLED')")
 public class Session {
 
     @Id
@@ -42,10 +41,7 @@ public class Session {
     private Integer durationMinutes;
 
     @NotBlank(message = "The session mode can't be blank")
-    @Pattern(
-            regexp = "^(ONLINE|IN_PERSON)$",
-            message = "The session mode must be ONLINE or IN_PERSON"
-    )
+    @Pattern(regexp = "^(ONLINE|IN_PERSON)$", message = "The session mode must be ONLINE or IN_PERSON")
     @Column(columnDefinition = "VARCHAR(20) not null")
     private String mode;
 
@@ -54,10 +50,7 @@ public class Session {
     private String location;
 
     @NotBlank(message = "The session status can't be blank")
-    @Pattern(
-            regexp = "^(SCHEDULED|COMPLETED|CANCELLED)$",
-            message = "The session status must be SCHEDULED, COMPLETED, or CANCELLED"
-    )
+    @Pattern(regexp = "^(SCHEDULED|COMPLETED|CANCELLED)$", message = "The session status must be SCHEDULED, COMPLETED, or CANCELLED")
     @Column(columnDefinition = "VARCHAR(20) not null DEFAULT 'SCHEDULED'")
     private String status = "SCHEDULED";
 
@@ -67,9 +60,9 @@ public class Session {
     @JsonIgnore
     private SkillOffer skillOffer;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "session")
-    private Set<SessionParticipant> sessionParticipants;
-
+    @OneToMany(mappedBy = "session")
+    @JsonIgnore
+    private List<SessionParticipant> sessionParticipants;
 }
 
 
