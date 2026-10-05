@@ -71,6 +71,7 @@ public class SkillOffer {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "skillOffer")
     private Set<Exchange> exchanges;
 
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "skillOffer")
-//    private Set<Session> sessions;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "skillOffer")
+    private Set<Session> sessions;
+
 }

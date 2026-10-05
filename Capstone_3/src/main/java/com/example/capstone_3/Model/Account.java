@@ -75,14 +75,14 @@ public class Account {
     private LocalDateTime createdAt = LocalDateTime.now();
 
 
-//    // Account 1 : 1 IndividualProfile
-//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
-//    private IndividualProfile individualProfile;
+    // Account 1 : 1 IndividualProfile
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
+    private IndividualProfile individualProfile;
 
 
-//    // Account 1 : 1 CompanyProfile
-//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
-//    private CompanyProfile companyProfile;
+    // Account 1 : 1 CompanyProfile
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
+    private CompanyProfile companyProfile;
 
 
     // Account 1 : Many AccountSkill
@@ -100,17 +100,19 @@ public class Account {
     private Set<SkillOffer> skillOffers; // سويتها
 
 
-//    // Account 1 : Many TokenTransaction
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "account")
-//    private Set<TokenTransaction> tokenTransactions;
-//
-//
-//    // Reviews written by this account
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reviewerAccount")
-//    private Set<Review> reviewsWritten;
-//
-//
-//    // Reviews received by this account
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reviewedAccount")
-//    private Set<Review> reviewsReceived;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "account")
+    private Set<TokenTransaction> tokenTransactions;
+
+
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reviewerAccount")
+   private Set<Review> reviewsWritten;
+
+
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "reviewedAccount")
+    private Set<Review> reviewsReceived;
+
+
 }

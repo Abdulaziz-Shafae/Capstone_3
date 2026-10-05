@@ -34,6 +34,9 @@ public class LearningRequestService {
             throw new ApiException("Skill not found");
         }
         calculateExtraTokens(learningRequest);
+        learningRequest.setUrgent(false);
+        learningRequest.setUrgentTokens(0);
+
         if (account.getTokenBalance()<totalTokens(learningRequest)) {
             throw new ApiException("Not enough tokens");
         }
@@ -57,7 +60,6 @@ public class LearningRequestService {
         }
         oldRequest.setDescription(learningRequest.getDescription());
         oldRequest.setMode(learningRequest.getMode());
-        oldRequest.setUrgent(learningRequest.getUrgent());
         oldRequest.setWeekend(learningRequest.getWeekend());
         oldRequest.setBaseTokens(learningRequest.getBaseTokens());
         oldRequest.setNeededBy(learningRequest.getNeededBy());
@@ -83,16 +85,12 @@ public class LearningRequestService {
 
 
 
-
+// نرجع لها
     private Integer totalTokens(LearningRequest learningRequest) {
         return learningRequest.getBaseTokens()+learningRequest.getUrgentTokens()+learningRequest.getWeekendTokens();
     }
     private void calculateExtraTokens(LearningRequest learningRequest) {
-        if (learningRequest.getUrgent()!=null&&learningRequest.getUrgent()) {
-            learningRequest.setUrgentTokens(5);
-        } else {
-            learningRequest.setUrgentTokens(0);
-        }if (learningRequest.getWeekend()!=null&&learningRequest.getWeekend()) {
+        if (learningRequest.getWeekend()!=null&&learningRequest.getWeekend()) {
             learningRequest.setWeekendTokens(2);
         } else {
             learningRequest.setWeekendTokens(0);
