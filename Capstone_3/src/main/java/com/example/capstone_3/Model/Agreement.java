@@ -17,6 +17,7 @@ import lombok.Setter;
 public class Agreement {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotBlank(message = "The agreement content can't be blank")
@@ -31,7 +32,6 @@ public class Agreement {
 
     @NotNull(message = "The exchange can't be null")
     @OneToOne
-    @MapsId
     @JoinColumn(name = "exchange_id", unique = true, nullable = false)
     @JsonIgnore
     private Exchange exchange;

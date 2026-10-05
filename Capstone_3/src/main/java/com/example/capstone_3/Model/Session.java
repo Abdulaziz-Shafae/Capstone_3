@@ -20,7 +20,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "mode IN ('ONLINE', 'IN_PERSON') AND status IN ('SCHEDULED', 'COMPLETED', 'CANCELLED')")
+@Check(constraints = "mode IN ('ONLINE', 'IN_PERSON')")
+@Check(constraints = "status IN ('SCHEDULED', 'COMPLETED', 'CANCELLED')")
 public class Session {
 
     @Id
@@ -41,7 +42,10 @@ public class Session {
     private Integer durationMinutes;
 
     @NotBlank(message = "The session mode can't be blank")
-    @Pattern(regexp = "^(ONLINE|IN_PERSON)$", message = "The session mode must be ONLINE or IN_PERSON")
+    @Pattern(
+            regexp = "^(ONLINE|IN_PERSON)$",
+            message = "The session mode must be ONLINE or IN_PERSON"
+    )
     @Column(columnDefinition = "VARCHAR(20) not null")
     private String mode;
 
@@ -50,7 +54,10 @@ public class Session {
     private String location;
 
     @NotBlank(message = "The session status can't be blank")
-    @Pattern(regexp = "^(SCHEDULED|COMPLETED|CANCELLED)$", message = "The session status must be SCHEDULED, COMPLETED, or CANCELLED")
+    @Pattern(
+            regexp = "^(SCHEDULED|COMPLETED|CANCELLED)$",
+            message = "The session status must be SCHEDULED, COMPLETED, or CANCELLED"
+    )
     @Column(columnDefinition = "VARCHAR(20) not null DEFAULT 'SCHEDULED'")
     private String status = "SCHEDULED";
 
@@ -61,7 +68,6 @@ public class Session {
     private SkillOffer skillOffer;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "session")
-    @JsonIgnore
     private Set<SessionParticipant> sessionParticipants;
 
 }

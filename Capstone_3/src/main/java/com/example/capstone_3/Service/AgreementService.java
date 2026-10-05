@@ -9,9 +9,7 @@ import com.example.capstone_3.Repository.ExchangeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +35,11 @@ public class AgreementService {
 
         Agreement agreement = new Agreement();
         agreement.setContent(agreementDtoIn.getContent());
+
         agreement.setProviderAccepted(agreementDtoIn.getProviderAccepted() != null ? agreementDtoIn.getProviderAccepted() : false);
         agreement.setReceiverAccepted(agreementDtoIn.getReceiverAccepted() != null ? agreementDtoIn.getReceiverAccepted() : false);
-        agreement.setExchange(exchange);
 
+        agreement.setExchange(exchange);
         agreementRepository.save(agreement);
     }
 
@@ -62,51 +61,10 @@ public class AgreementService {
         }
 
         oldAgreement.setContent(agreementDtoIn.getContent());
-        oldAgreement.setProviderAccepted(agreementDtoIn.getProviderAccepted() != null ? agreementDtoIn.getProviderAccepted() : oldAgreement.getProviderAccepted());
-        oldAgreement.setReceiverAccepted(agreementDtoIn.getReceiverAccepted() != null ? agreementDtoIn.getReceiverAccepted() : oldAgreement.getReceiverAccepted());
+        oldAgreement.setProviderAccepted(agreementDtoIn.getProviderAccepted() != null ? agreementDtoIn.getProviderAccepted() : false);
+        oldAgreement.setReceiverAccepted(agreementDtoIn.getReceiverAccepted() != null ? agreementDtoIn.getReceiverAccepted() : false);
         oldAgreement.setExchange(exchange);
-
         agreementRepository.save(oldAgreement);
-    }
-
-    public void providerAccept(Integer exchangeId) {
-        Agreement agreement = findAgreementByExchangeId(exchangeId);
-        agreement.setProviderAccepted(true);
-        agreementRepository.save(agreement);
-    }
-
-    public void receiverAccept(Integer exchangeId) {
-        Agreement agreement = findAgreementByExchangeId(exchangeId);
-        agreement.setReceiverAccepted(true);
-        agreementRepository.save(agreement);
-    }
-
-    public Map<String, Object> getAcceptanceStatus(Integer exchangeId) {
-        Agreement agreement = findAgreementByExchangeId(exchangeId);
-
-        Map<String, Object> status = new HashMap<>();
-        status.put("exchangeId", exchangeId);
-        status.put("providerAccepted", agreement.getProviderAccepted());
-        status.put("receiverAccepted", agreement.getReceiverAccepted());
-        status.put("fullyAccepted", Boolean.TRUE.equals(agreement.getProviderAccepted()) && Boolean.TRUE.equals(agreement.getReceiverAccepted()));
-
-        return status;
-    }
-
-    private Agreement findAgreementByExchangeId(Integer exchangeId) {
-        Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
-
-        if (exchange == null) {
-            throw new ApiException("No exchange found");
-        }
-
-        Agreement agreement = agreementRepository.findAgreementByExchange_Id(exchangeId);
-
-        if (agreement == null) {
-            throw new ApiException("No agreement found for this exchange");
-        }
-
-        return agreement;
     }
 
     public void delete(Integer id) {
@@ -115,8 +73,6 @@ public class AgreementService {
         if (oldAgreement == null) {
             throw new ApiException("No agreement found");
         }
-
         agreementRepository.delete(oldAgreement);
     }
 }
-
