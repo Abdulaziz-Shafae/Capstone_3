@@ -4,6 +4,7 @@ import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.AccountDtoIn;
 import com.example.capstone_3.DtoIn.LoginDtoIn;
+import com.example.capstone_3.DtoIn.RegisterIndividualDtoIn;
 import com.example.capstone_3.Service.AccountService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -66,6 +67,14 @@ public class AccountController {
         session.invalidate();
 
         return ResponseEntity.status(200).body(new ApiResponse("Logged out successfully"));
+    }
+
+    @PostMapping("/register/individual")
+    public ResponseEntity<?> registerIndividual(@RequestBody @Valid RegisterIndividualDtoIn registerIndividualDtoIn) {
+
+        accountService.registerIndividual(registerIndividualDtoIn);
+
+        return ResponseEntity.status(201).body(new ApiResponse("Individual account registered successfully"));
     }
 
 }
