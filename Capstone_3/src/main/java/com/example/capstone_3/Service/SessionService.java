@@ -2,13 +2,18 @@ package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.DtoIn.SessionDtoIn;
+import com.example.capstone_3.Model.Exchange;
 import com.example.capstone_3.Model.Session;
+import com.example.capstone_3.Model.SessionParticipant;
 import com.example.capstone_3.Model.SkillOffer;
+import com.example.capstone_3.Repository.ExchangeRepository;
+import com.example.capstone_3.Repository.SessionParticipantRepository;
 import com.example.capstone_3.Repository.SessionRepository;
 import com.example.capstone_3.Repository.SkillOfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,6 +22,8 @@ public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final SkillOfferRepository skillOfferRepository;
+    private final ExchangeRepository exchangeRepository;
+    private final SessionParticipantRepository sessionParticipantRepository;
 
     public List<Session> get() {
         return sessionRepository.findAll();
@@ -30,7 +37,6 @@ public class SessionService {
         }
 
         Session session = new Session();
-
         session.setTitle(sessionDtoIn.getTitle());
         session.setScheduledAt(sessionDtoIn.getScheduledAt());
         session.setDurationMinutes(sessionDtoIn.getDurationMinutes());
@@ -77,5 +83,96 @@ public class SessionService {
 
         sessionRepository.delete(oldSession);
     }
-}
 
+    public void createSession(Integer offerId, SessionDtoIn sessionDtoIn) {
+        SkillOffer skillOffer = skillOfferRepository.findSkillOfferById(offerId);
+
+        if (skillOffer == null) {
+            throw new ApiException("No skill offer found");
+        }
+
+        if (!"ACTIVE".equals(skillOffer.getStatus())) {
+            throw new ApiException("Skill offer is not active");
+        }
+
+        Session session = new Session();
+        session.setTitle(sessionDtoIn.getTitle());
+        session.setScheduledAt(sessionDtoIn.getScheduledAt());
+        session.setDurationMinutes(sessionDtoIn.getDurationMinutes());
+        session.setMode(sessionDtoIn.getMode());
+        session.setMeetingLink(sessionDtoIn.getMeetingLink());
+        session.setLocation(sessionDtoIn.getLocation());
+        session.setStatus("SCHEDULED");
+        session.setSkillOffer(skillOffer);
+
+        sessionRepository.save(session);
+    }
+
+    public void joinSession(Integer sessionId, Integer exchangeId) {
+        Session session = sessionRepository.findSessionById(sessionId);
+
+        if (session == null) {
+            throw new ApiException("No session found");
+        }
+
+        Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
+
+        if (exchange == null) {
+            throw new ApiException("No exchange found");
+        }
+
+        if (!session.getSkillOffer().getId().equals(exchange.getSkillOffer().getId())) {
+            throw new ApiException("Exchange does not belong to this skill offer");
+        }
+
+        if (!"SCHEDULED".equals(session.getStatus())) {
+            throw new ApiException("Session is not scheduled");
+        }
+
+        if (sessionParticipantRepository.findSessionParticipantBySession_IdAndExchange_Id(sessionId, exchangeId) != null) {
+            throw new ApiException("Exchange already joined this session");
+        }
+
+        SessionParticipant participant = new SessionParticipant();
+        participant.setSession(session);
+        participant.setExchange(exchange);
+        participant.setStatus("JOINED");
+
+        sessionParticipantRepository.save(participant);
+    }
+
+    public void updateAttendance(Integer sessionId, Integer exchangeId, String status) {
+        if (status == null || !(status.equals("ATTENDED") || status.equals("ABSENT") || status.equals("CANCELLED"))) {
+            throw new ApiException("Status must be ATTENDED, ABSENT, or CANCELLED");
+        }
+
+        SessionParticipant participant = sessionParticipantRepository.findSessionParticipantBySession_IdAndExchange_Id(sessionId, exchangeId);
+
+        if (participant == null) {
+            throw new ApiException("No participant found for this session and exchange");
+        }
+
+        participant.setStatus(status);
+        sessionParticipantRepository.save(participant);
+    }
+
+    public List<Session> getSessionsByOffer(Integer offerId) {
+        SkillOffer skillOffer = skillOfferRepository.findSkillOfferById(offerId);
+
+        if (skillOffer == null) {
+            throw new ApiException("No skill offer found");
+        }
+
+        return sessionRepository.findBySkillOffer_Id(offerId);
+    }
+
+    public List<Session> getSessionsByExchange(Integer exchangeId) {
+        Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
+
+        if (exchange == null) {
+            throw new ApiException("No exchange found");
+        }
+
+        return sessionRepository.findDistinctBySessionParticipants_Exchange_Id(exchangeId);
+    }
+}

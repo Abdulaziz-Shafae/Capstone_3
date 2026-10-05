@@ -16,18 +16,14 @@ public class ExchangeService {
 
     private final ExchangeRepository exchangeRepository;
 
-
-    public List<Exchange> get(){
+    public List<Exchange> get() {
         return exchangeRepository.findAll();
     }
 
-
-    public void add(ExchangeDtoIn exchangeDtoIn){
-
+    public void add(ExchangeDtoIn exchangeDtoIn) {
         Exchange exchange = new Exchange();
 
         exchange.setTokenAmount(exchangeDtoIn.getTokenAmount());
-
         exchange.setStatus("PENDING");
         exchange.setCreatedAt(LocalDateTime.now());
         exchange.setCompletedAt(null);
@@ -35,12 +31,10 @@ public class ExchangeService {
         exchangeRepository.save(exchange);
     }
 
-
-    public void update(Integer id, ExchangeDtoIn exchangeDtoIn){
-
+    public void update(Integer id, ExchangeDtoIn exchangeDtoIn) {
         Exchange oldExchange = exchangeRepository.findExchangeById(id);
 
-        if(oldExchange == null){
+        if (oldExchange == null) {
             throw new ApiException("No exchange found");
         }
 
@@ -49,16 +43,30 @@ public class ExchangeService {
         exchangeRepository.save(oldExchange);
     }
 
-
-    public void delete(Integer id){
-
+    public void delete(Integer id) {
         Exchange oldExchange = exchangeRepository.findExchangeById(id);
 
-        if(oldExchange == null){
+        if (oldExchange == null) {
             throw new ApiException("No exchange found");
         }
 
         exchangeRepository.delete(oldExchange);
     }
 
+    public void completeExchange(Integer exchangeId) {
+        Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
+
+        if (exchange == null) {
+            throw new ApiException("No exchange found");
+        }
+
+        if ("COMPLETED".equals(exchange.getStatus())) {
+            throw new ApiException("Exchange is already completed");
+        }
+
+        exchange.setStatus("COMPLETED");
+        exchange.setCompletedAt(LocalDateTime.now());
+
+        exchangeRepository.save(exchange);
+    }
 }

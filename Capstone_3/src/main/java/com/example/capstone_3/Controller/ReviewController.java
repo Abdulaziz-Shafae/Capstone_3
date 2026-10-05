@@ -17,35 +17,36 @@ public class ReviewController {
 
     @GetMapping("/get")
     public ResponseEntity<?> get() {
-        return ResponseEntity.status(200).body(reviewService.get());
+        return ResponseEntity.ok(reviewService.get());
     }
 
-    @GetMapping("/get/exchange/{exchangeId}")
-    public ResponseEntity<?> getByExchangeId(@PathVariable Integer exchangeId) {
-        return ResponseEntity.status(200).body(reviewService.getByExchangeId(exchangeId));
+    @PostMapping("/add/{exchangeId}/{reviewerId}")
+    public ResponseEntity<?> add(@PathVariable Integer exchangeId, @PathVariable Integer reviewerId, @RequestBody @Valid ReviewDtoIn dto) {
+        reviewService.add(exchangeId, reviewerId, dto);
+        return ResponseEntity.ok(new ApiResponse("Review added successfully"));
     }
 
-    @GetMapping("/get/account/{accountId}")
-    public ResponseEntity<?> getByReviewedAccountId(@PathVariable Integer accountId) {
-        return ResponseEntity.status(200).body(reviewService.getByReviewedAccountId(accountId));
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<?> getByAccountId(@PathVariable Integer accountId) {
+
+        return ResponseEntity.ok(reviewService.getByReviewedAccountId(accountId));
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody @Valid ReviewDtoIn dto) {
-        reviewService.add(dto);
-        return ResponseEntity.status(200).body(new ApiResponse("review added"));
+    @GetMapping("/account/{accountId}/average")
+    public ResponseEntity<?> getAverageRating(@PathVariable Integer accountId) {
+
+        return ResponseEntity.ok(reviewService.getAverageRating(accountId));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody @Valid ReviewDtoIn dto) {
         reviewService.update(id, dto);
-        return ResponseEntity.status(200).body(new ApiResponse("review updated"));
+        return ResponseEntity.ok(new ApiResponse("Review updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         reviewService.delete(id);
-        return ResponseEntity.status(200).body(new ApiResponse("review deleted"));
+        return ResponseEntity.ok(new ApiResponse("Review deleted successfully"));
     }
 }
-

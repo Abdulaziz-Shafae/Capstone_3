@@ -27,10 +27,7 @@ public class SessionParticipant {
     private Integer id;
 
     @NotBlank(message = "The participant status can't be blank")
-    @Pattern(
-            regexp = "^(JOINED|ATTENDED|ABSENT|CANCELLED)$",
-            message = "The status must be JOINED, ATTENDED, ABSENT, or CANCELLED"
-    )
+    @Pattern(regexp = "^(JOINED|ATTENDED|ABSENT|CANCELLED)$", message = "The status must be JOINED, ATTENDED, ABSENT, or CANCELLED")
     @Column(columnDefinition = "VARCHAR(20) not null DEFAULT 'JOINED'")
     private String status = "JOINED";
 

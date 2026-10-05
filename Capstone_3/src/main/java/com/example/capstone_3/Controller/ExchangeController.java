@@ -42,4 +42,16 @@ public class ExchangeController {
         return ResponseEntity.status(200).body(new ApiResponse("exchange deleted"));
     }
 
+    @PutMapping("/{exchangeId}/complete")
+    public ResponseEntity<?> completeExchange(
+            @PathVariable Integer exchangeId) {
+
+        exchangeService.completeExchange(exchangeId);
+
+        return ResponseEntity.ok(
+                new ApiResponse("Exchange completed successfully")
+        );
+    }
+
+
 }

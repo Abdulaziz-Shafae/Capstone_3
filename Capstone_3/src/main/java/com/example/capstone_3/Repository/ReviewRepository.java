@@ -14,10 +14,11 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<Review> findReviewsByExchange_Id(Integer exchangeId);
 
     Review findReviewByExchange_IdAndReviewerAccount_Id(
-            Integer exchangeId,
-            Integer reviewerAccountId
-    );
+            Integer exchangeId, Integer reviewerAccountId);
 
     List<Review> findReviewsByReviewedAccount_Id(Integer accountId);
+
+    Double findAverageRatingByReviewedAccount_Id(Integer accountId);
 }
+
 
