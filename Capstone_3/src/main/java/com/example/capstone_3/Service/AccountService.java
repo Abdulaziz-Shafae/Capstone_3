@@ -2,6 +2,7 @@ package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.DtoIn.AccountDtoIn;
+import com.example.capstone_3.DtoIn.LoginDtoIn;
 import com.example.capstone_3.Model.Account;
 import com.example.capstone_3.Repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-
 
     public List<Account> get(){
         return accountRepository.findAll();
@@ -77,5 +77,26 @@ public class AccountService {
 
         accountRepository.delete(oldAccount);
     }
+
+
+    public Integer login(LoginDtoIn loginDtoIn){
+
+        Account oldAcc = accountRepository.findAccountByEmail(loginDtoIn.getEmail());
+
+        if(oldAcc == null){
+            throw new ApiException("Email not found");
+        }
+
+        oldAcc = accountRepository.findAccountByEmailAndPassword(
+                loginDtoIn.getEmail(), loginDtoIn.getPassword());
+
+        if(oldAcc == null){
+            throw new ApiException("Wrong password");
+        }
+
+        return oldAcc.getId();
+    }
+
+
 
 }

@@ -24,15 +24,30 @@ public class LearningRequestService {
         return learningRequestRepository.findAll();
     }
 
-    public void addLearningRequest(Integer accountId, Integer skillId, LearningRequest learningRequest) {
+    public void addLearningRequest(Integer accountId, Integer skillId, Integer providerAccountId, LearningRequest learningRequest){
+
         Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
+
+        if(account == null){
             throw new ApiException("Account not found");
         }
+
         Skill skill = skillRepository.findSkillById(skillId);
-        if (skill == null) {
+
+        if(skill == null){
             throw new ApiException("Skill not found");
         }
+
+        Account providerAccount = accountRepository.findAccountById(providerAccountId);
+
+        if(providerAccount == null){
+            throw new ApiException("Provider account not found");
+        }
+
+        if(accountId.equals(providerAccountId)){
+            throw new ApiException("Requester and provider must be different");
+        }
+
         calculateExtraTokens(learningRequest);
         learningRequest.setUrgent(false);
         learningRequest.setUrgentTokens(0);
@@ -40,13 +55,19 @@ public class LearningRequestService {
         if (account.getTokenBalance()<totalTokens(learningRequest)) {
             throw new ApiException("Not enough tokens");
         }
+
+        learningRequest.setId(null);
+        learningRequest.setExchange(null);
+        learningRequest.setRequestNegotiations(null);
+
         learningRequest.setRequesterAccount(account);
+        learningRequest.setProviderAccount(providerAccount);
         learningRequest.setSkill(skill);
         learningRequest.setStatus("OPEN");
         learningRequest.setCreatedAt(LocalDateTime.now());
-        learningRequestRepository.save(learningRequest);
 
-}
+        learningRequestRepository.save(learningRequest);
+    }
 
 
     public void updateLearningRequest(Integer id, LearningRequest learningRequest){
