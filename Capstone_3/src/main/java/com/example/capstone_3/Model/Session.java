@@ -13,6 +13,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -65,6 +66,10 @@ public class Session {
     @JoinColumn(name = "skill_offer_id", nullable = false)
     @JsonIgnore
     private SkillOffer skillOffer;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "session")
+    private Set<SessionParticipant> sessionParticipants;
+
 }
 
 
