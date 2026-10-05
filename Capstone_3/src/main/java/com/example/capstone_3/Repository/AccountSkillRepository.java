@@ -12,6 +12,7 @@ import java.util.List;
 public interface AccountSkillRepository extends JpaRepository<AccountSkill,Integer> {
   AccountSkill findAccountSkillById(Integer id);
   AccountSkill findAccountSkillByAccountAndSkill(Account account, Skill skill);
-  List<AccountSkill>findAllByAccountAndVerified(Account account,boolean verified);
+  List<AccountSkill>findAllByAccountAndVerified(Account account,Boolean verified);
   List<AccountSkill>findAllByAccount(Account account);
+  List<AccountSkill>findAllBySkillAndVerified(Skill skill,Boolean verified);
 }

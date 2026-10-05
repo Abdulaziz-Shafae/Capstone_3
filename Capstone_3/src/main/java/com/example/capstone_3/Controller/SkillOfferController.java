@@ -3,6 +3,7 @@ package com.example.capstone_3.Controller;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.Model.SkillOffer;
 import com.example.capstone_3.Service.SkillOfferService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,11 @@ public class SkillOfferController {
         return ResponseEntity.status(200).body(skillOfferService.getSkillOffer());
     }
 
-    @PostMapping("/create/{accountId}/{skillId}")
-    public ResponseEntity<?> addOffer(@PathVariable Integer accountId, @PathVariable Integer skillId, @RequestBody @Valid SkillOffer skillOffer) {
-        skillOfferService.addOffer(accountId, skillId, skillOffer);
+    // #26 Create skill offer (login required)
+    @PostMapping("/create/{skillId}")
+    public ResponseEntity<?> addOffer(HttpSession session, @PathVariable Integer skillId,
+                                      @RequestBody @Valid SkillOffer skillOffer) {
+        skillOfferService.addOffer((Integer) session.getAttribute("accountId"), skillId, skillOffer);
         return ResponseEntity.status(200).body(new ApiResponse("Skill offer added"));
     }
 
@@ -36,5 +39,20 @@ public class SkillOfferController {
     public ResponseEntity<?> deleteSkillOffer(@PathVariable Integer id) {
         skillOfferService.deleteSkillOffer(id);
         return ResponseEntity.status(200).body(new ApiResponse("Skill offer deleted"));
+    }
+
+    @GetMapping("/skill/{skillId}")
+    public ResponseEntity<?> getOffersBySkill(@PathVariable Integer skillId) {
+        return ResponseEntity.status(200).body(skillOfferService.getOffersBySkill(skillId));
+    }
+
+
+    @GetMapping("/provider/{providerId}")
+    public ResponseEntity<?> getOffersCreatedByProvider(@PathVariable Integer providerId) {
+        return ResponseEntity.status(200).body(skillOfferService.getOffersCreatedByProvider(providerId));
+    }
+    @GetMapping("/available")
+    public ResponseEntity<?> getActiveOffers() {
+        return ResponseEntity.status(200).body(skillOfferService.getActiveOffers());
     }
 }
