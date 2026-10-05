@@ -17,7 +17,6 @@ import org.hibernate.annotations.Check;
 public class CompanyProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
 
@@ -70,7 +69,8 @@ public class CompanyProfile {
 
 
     @OneToOne
-    @JoinColumn(name = "account_id", unique = true)
+    @MapsId
+    @JoinColumn(name = "account_id")
     @JsonIgnore
     private Account account;
 }
