@@ -37,5 +37,23 @@ public class AgreementController {
         agreementService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("agreement deleted"));
     }
+
+    @PutMapping("/{exchangeId}/provider-accept")
+    public ResponseEntity<?> providerAccept(@PathVariable Integer exchangeId) {
+        agreementService.providerAccept(exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Provider accepted the agreement"));
+    }
+
+    @PutMapping("/{exchangeId}/receiver-accept")
+    public ResponseEntity<?> receiverAccept(@PathVariable Integer exchangeId) {
+        agreementService.receiverAccept(exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Receiver accepted the agreement"));
+    }
+
+    @GetMapping("/{exchangeId}/status")
+    public ResponseEntity<?> getAcceptanceStatus(@PathVariable Integer exchangeId) {
+        return ResponseEntity.status(200).body(agreementService.getAcceptanceStatus(exchangeId));
+    }
 }
+
 
