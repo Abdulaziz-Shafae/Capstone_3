@@ -3,8 +3,12 @@ package com.example.capstone_3.Service;
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.DtoIn.AccountDtoIn;
 import com.example.capstone_3.DtoIn.LoginDtoIn;
+import com.example.capstone_3.DtoIn.RegisterIndividualDtoIn;
 import com.example.capstone_3.Model.Account;
+import com.example.capstone_3.Model.IndividualProfile;
 import com.example.capstone_3.Repository.AccountRepository;
+import com.example.capstone_3.Repository.IndividualProfileRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +20,7 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final IndividualProfileRepository individualProfileRepository;
 
     public List<Account> get(){
         return accountRepository.findAll();
@@ -95,6 +100,43 @@ public class AccountService {
         }
 
         return oldAcc.getId();
+    }
+
+    @Transactional
+    public void registerIndividual(RegisterIndividualDtoIn dtoIn) {
+
+        Account oldAccount = accountRepository.findAccountByEmail(dtoIn.getEmail());
+
+        if (oldAccount != null) {
+            throw new ApiException("Email already exists");
+        }
+
+        if (individualProfileRepository.existsByPhone(dtoIn.getPhone())) {
+            throw new ApiException("Phone already exists");
+        }
+
+        Account account = new Account();
+
+        account.setEmail(dtoIn.getEmail());
+        account.setPassword(dtoIn.getPassword());
+        account.setAccountType("INDIVIDUAL");
+        account.setTokenBalance(3);
+        account.setStatus("ACTIVE");
+        account.setEmailVerified(false);
+        account.setCreatedAt(LocalDateTime.now());
+
+        IndividualProfile profile = new IndividualProfile();
+
+        profile.setName(dtoIn.getName());
+        profile.setPhone(dtoIn.getPhone());
+        profile.setBio(dtoIn.getBio());
+        profile.setCity(dtoIn.getCity());
+        profile.setProfileImage(dtoIn.getProfileImage());
+
+        profile.setAccount(account);
+        account.setIndividualProfile(profile);
+
+        accountRepository.save(account);
     }
 
 
