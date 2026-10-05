@@ -81,6 +81,7 @@ public class SkillOfferService {
         if (skillOffer.getExchanges()!=null&&!skillOffer.getExchanges().isEmpty()) {
             throw new ApiException("Offer has exchanges and cannot be deleted");
         }
+
         skillOfferRepository.delete(skillOffer);
     }
 

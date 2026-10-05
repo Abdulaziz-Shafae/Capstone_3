@@ -20,8 +20,8 @@ public class SkillAssessmentController {
         return ResponseEntity.status(200).body(skillAssessmentService.getAllSkillAssessments());
     }
 
-    @PostMapping("/add/{accountSkillId}")
-    public ResponseEntity<?> addSkillAssessment(@PathVariable Integer accountSkillId, @RequestBody @Valid SkillAssessment skillAssessment) {
+    @PostMapping("/take/{accountSkillId}")
+    public ResponseEntity<?> takeSkillAssessment(@PathVariable Integer accountSkillId, @RequestBody @Valid SkillAssessment skillAssessment) {
         skillAssessmentService.addSkillAssessment(accountSkillId, skillAssessment);
         return ResponseEntity.status(200).body(new ApiResponse("Skill assessment added"));
     }
