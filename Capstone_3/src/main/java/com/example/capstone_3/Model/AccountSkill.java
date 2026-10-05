@@ -16,6 +16,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"account_id", "skill_id"})
+})
 public class AccountSkill {
 
     @Id

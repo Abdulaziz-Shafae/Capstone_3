@@ -76,26 +76,26 @@ public class Exchange {
     private SkillOffer skillOffer;//سويتها
 
 
-    // Exchange 1 : 1 Agreement
-    // Exchange is the parent
-//    @OneToOne(cascade = CascadeType.ALL, mappedBy = "exchange")
-//    private Agreement agreement;
+//     Exchange 1 : 1 Agreement
+//     Exchange is the parent
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "exchange")
+    private Agreement agreement;
 
 
-    // Exchange 1 : Many SessionParticipant
-    // Exchange is the parent
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-//    private Set<SessionParticipant> sessionParticipants;
+//     Exchange 1 : Many SessionParticipant
+//     Exchange is the parent
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+    private Set<SessionParticipant> sessionParticipants;
 
 
-    // Exchange 1 : Many TokenTransaction
-    // Exchange is the parent
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-//    private Set<TokenTransaction> tokenTransactions;
+//     Exchange 1 : Many TokenTransaction
+//     Exchange is the parent
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+    private Set<TokenTransaction> tokenTransactions;
 
 
-    // Exchange 1 : Many Review
-    // Exchange is the parent
-//    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
-//    private Set<Review> reviews;
+//     Exchange 1 : Many Review
+//     Exchange is the parent
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "exchange")
+    private Set<Review> reviews;
 }

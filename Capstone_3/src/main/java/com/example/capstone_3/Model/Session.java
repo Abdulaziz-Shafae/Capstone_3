@@ -13,7 +13,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Setter
 @Getter
@@ -60,9 +60,10 @@ public class Session {
     @JsonIgnore
     private SkillOffer skillOffer;
 
-    @OneToMany(mappedBy = "session")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "session")
     @JsonIgnore
-    private List<SessionParticipant> sessionParticipants;
+    private Set<SessionParticipant> sessionParticipants;
+
 }
 
 
