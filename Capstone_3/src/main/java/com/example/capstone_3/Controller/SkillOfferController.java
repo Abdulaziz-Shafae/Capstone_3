@@ -20,7 +20,7 @@ public class SkillOfferController {
         return ResponseEntity.status(200).body(skillOfferService.getSkillOffer());
     }
 
-    @PostMapping("/add/{accountId}/{skillId}")
+    @PostMapping("/create/{accountId}/{skillId}")
     public ResponseEntity<?> addOffer(@PathVariable Integer accountId, @PathVariable Integer skillId, @RequestBody @Valid SkillOffer skillOffer) {
         skillOfferService.addOffer(accountId, skillId, skillOffer);
         return ResponseEntity.status(200).body(new ApiResponse("Skill offer added"));
