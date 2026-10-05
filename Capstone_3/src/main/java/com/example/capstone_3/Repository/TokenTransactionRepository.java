@@ -2,6 +2,8 @@ package com.example.capstone_3.Repository;
 
 import com.example.capstone_3.Model.TokenTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,5 +17,9 @@ public interface TokenTransactionRepository
     List<TokenTransaction> findTokenTransactionsByAccount_Id(Integer accountId);
 
     List<TokenTransaction> findTokenTransactionsByExchange_Id(Integer exchangeId);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TokenTransaction t WHERE t.account.id = :accountId AND t.type = 'TEACHING' AND t.amount > 0")
+    Long sumTeachingTokens(@Param("accountId") Integer accountId);
+
 }
 

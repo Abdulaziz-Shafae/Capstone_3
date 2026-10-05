@@ -1,5 +1,6 @@
 package com.example.capstone_3.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -115,4 +116,14 @@ public class Account {
     // Reviews received by this account
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "reviewedAccount")
     private Set<Review> reviewsReceived;
+
+    @JsonIgnore
+    @Column(length = 64)
+    private String emailVerificationHash;
+
+    @JsonIgnore
+    private LocalDateTime emailVerificationExpiresAt;
+
+    @JsonIgnore
+    private LocalDateTime emailVerificationSentAt;
 }

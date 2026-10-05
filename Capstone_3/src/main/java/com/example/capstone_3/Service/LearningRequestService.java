@@ -1,16 +1,18 @@
 package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
-import com.example.capstone_3.Model.Account;
-import com.example.capstone_3.Model.LearningRequest;
-import com.example.capstone_3.Model.Skill;
-import com.example.capstone_3.Repository.AccountRepository;
-import com.example.capstone_3.Repository.LearningRequestRepository;
-import com.example.capstone_3.Repository.SkillRepository;
+import com.example.capstone_3.DtoIn.CreateLearningRequestDtoIn;
+import com.example.capstone_3.DtoOut.LearningRequestDtoOut;
+import com.example.capstone_3.DtoOut.RequestNegotiationDtoOut;
+import com.example.capstone_3.Model.*;
+import com.example.capstone_3.Repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -18,57 +20,102 @@ import java.util.List;
 public class LearningRequestService {
     private final LearningRequestRepository learningRequestRepository;
     private final AccountRepository accountRepository;
-    private final SkillRepository skillRepository;
+    private final SkillOfferRepository skillOfferRepository;
+    private final AccountSkillRepository accountSkillRepository;
+    private final AccountNameHelper accountNameHelper;
 
     public List<LearningRequest> getAllLearningRequests() {
         return learningRequestRepository.findAll();
     }
 
-    public void addLearningRequest(Integer accountId, Integer skillId, Integer providerAccountId, LearningRequest learningRequest){
+    @Transactional
+    public void addLearningRequest(Integer accountId, Integer offerId, CreateLearningRequestDtoIn dtoIn) {
+
+        if (accountId == null) {
+            throw new ApiException("Please log in first");
+        }
 
         Account account = accountRepository.findAccountById(accountId);
 
-        if(account == null){
+        if (account == null) {
             throw new ApiException("Account not found");
         }
 
-        Skill skill = skillRepository.findSkillById(skillId);
-
-        if(skill == null){
-            throw new ApiException("Skill not found");
+        if (!"ACTIVE".equals(account.getStatus())) {
+            throw new ApiException("Account is suspended or blocked");
         }
 
-        Account providerAccount = accountRepository.findAccountById(providerAccountId);
+        if (!Boolean.TRUE.equals(account.getEmailVerified())) {
+            throw new ApiException("Please verify your email first");
+        }
 
-        if(providerAccount == null){
+        SkillOffer offer = skillOfferRepository.findSkillOfferById(offerId);
+
+        if (offer == null) {
+            throw new ApiException("Skill offer not found");
+        }
+
+        if (!"ACTIVE".equals(offer.getStatus())) {
+            throw new ApiException("Skill offer is not active");
+        }
+
+        Account providerAccount = offer.getProviderAccount();
+
+        if (providerAccount == null) {
             throw new ApiException("Provider account not found");
         }
 
-        if(accountId.equals(providerAccountId)){
-            throw new ApiException("Requester and provider must be different");
+        if (accountId.equals(providerAccount.getId())) {
+            throw new ApiException("You cannot request your own offer");
         }
 
-        calculateExtraTokens(learningRequest);
-        learningRequest.setUrgent(false);
-        learningRequest.setUrgentTokens(0);
+        if (!"ACTIVE".equals(providerAccount.getStatus())) {
+            throw new ApiException("Provider account is not active");
+        }
 
-        if (account.getTokenBalance()<totalTokens(learningRequest)) {
+        Skill skill = offer.getSkill();
+
+        if (skill == null) {
+            throw new ApiException("Offer skill not found");
+        }
+
+        if (accountSkillRepository.findAccountSkillByAccountAndSkill(providerAccount, skill) == null) {
+            throw new ApiException("Provider does not have this skill");
+        }
+
+        if (!"BOTH".equals(offer.getMode()) && !offer.getMode().equals(dtoIn.getMode())) {
+            throw new ApiException("Requested mode is not supported by this offer");
+        }
+
+        if (offer.getTokenCost() == null || offer.getTokenCost() <= 0) {
+            throw new ApiException("Offer token cost is invalid");
+        }
+
+        if (account.getTokenBalance() == null || account.getTokenBalance() < offer.getTokenCost()) {
             throw new ApiException("Not enough tokens");
         }
 
-        learningRequest.setId(null);
-        learningRequest.setExchange(null);
-        learningRequest.setRequestNegotiations(null);
+        LearningRequest learningRequest = new LearningRequest();
+
+        learningRequest.setDescription(dtoIn.getDescription());
+        learningRequest.setMode(dtoIn.getMode());
+        learningRequest.setBaseTokens(offer.getTokenCost());
+
+        learningRequest.setUrgent(false);
+        learningRequest.setUrgentTokens(0);
+        learningRequest.setWeekend(false);
+        learningRequest.setWeekendTokens(0);
+        learningRequest.setNeededBy(null);
 
         learningRequest.setRequesterAccount(account);
         learningRequest.setProviderAccount(providerAccount);
         learningRequest.setSkill(skill);
+        learningRequest.setSkillOffer(offer);
         learningRequest.setStatus("OPEN");
         learningRequest.setCreatedAt(LocalDateTime.now());
 
         learningRequestRepository.save(learningRequest);
     }
-
 
     public void updateLearningRequest(Integer id, LearningRequest learningRequest){
 
@@ -102,7 +149,71 @@ public class LearningRequestService {
         learningRequestRepository.delete(learningRequest);
     }
 
+    @Transactional
+    public LearningRequestDtoOut getLearningRequestById(Integer requestId, Integer accountId) {
 
+        if (accountId == null) {
+            throw new ApiException("Please log in first");
+        }
+
+        Account account = accountRepository.findAccountById(accountId);
+
+        if (account == null) {
+            throw new ApiException("Account not found");
+        }
+
+        if (!"ACTIVE".equals(account.getStatus())) {
+            throw new ApiException("Account is suspended or blocked");
+        }
+
+        LearningRequest learningRequest = learningRequestRepository.findLearningRequestById(requestId);
+
+        if (learningRequest == null) {
+            throw new ApiException("Learning request not found");
+        }
+
+        Integer requesterAccountId = learningRequest.getRequesterAccount() == null ? null : learningRequest.getRequesterAccount().getId();
+        Integer providerAccountId = learningRequest.getProviderAccount() == null ? null : learningRequest.getProviderAccount().getId();
+
+        if (!accountId.equals(requesterAccountId) && !accountId.equals(providerAccountId)) {
+            throw new ApiException("You can only view requests you are involved in");
+        }
+
+        List<RequestNegotiationDtoOut> negotiationHistory = new ArrayList<>();
+
+        if (learningRequest.getRequestNegotiations() != null) {
+
+            List<RequestNegotiation> negotiations = new ArrayList<>(learningRequest.getRequestNegotiations());
+            negotiations.sort(Comparator.comparing(RequestNegotiation::getCreatedAt).thenComparing(RequestNegotiation::getId));
+
+            for (RequestNegotiation negotiation : negotiations) {
+                negotiationHistory.add(new RequestNegotiationDtoOut(negotiation.getId(), negotiation.getSenderAccountId(), accountNameHelper.getAccountName(negotiation.getSenderAccount()), negotiation.getMessage(), negotiation.getProposedDate(), negotiation.getCreatedAt(), negotiation.getUrgentTokens(), negotiation.getWeekendTokens()));
+            }
+        }
+
+        LearningRequestDtoOut dtoOut = new LearningRequestDtoOut();
+
+        dtoOut.setId(learningRequest.getId());
+        dtoOut.setRequesterAccountId(requesterAccountId);
+        dtoOut.setProviderAccountId(providerAccountId);
+        dtoOut.setSkillId(learningRequest.getSkill() == null ? null : learningRequest.getSkill().getId());
+        dtoOut.setSkillName(learningRequest.getSkill() == null ? null : learningRequest.getSkill().getName());
+        dtoOut.setOfferId(learningRequest.getSkillOffer() == null ? null : learningRequest.getSkillOffer().getId());
+        dtoOut.setDescription(learningRequest.getDescription());
+        dtoOut.setMode(learningRequest.getMode());
+        dtoOut.setBaseTokens(learningRequest.getBaseTokens());
+        dtoOut.setUrgent(learningRequest.getUrgent());
+        dtoOut.setUrgentTokens(learningRequest.getUrgentTokens());
+        dtoOut.setWeekend(learningRequest.getWeekend());
+        dtoOut.setWeekendTokens(learningRequest.getWeekendTokens());
+        dtoOut.setTotalTokens(totalTokens(learningRequest));
+        dtoOut.setStatus(learningRequest.getStatus());
+        dtoOut.setNeededBy(learningRequest.getNeededBy());
+        dtoOut.setCreatedAt(learningRequest.getCreatedAt());
+        dtoOut.setNegotiationHistory(negotiationHistory);
+
+        return dtoOut;
+    }
 
 
 
@@ -112,9 +223,10 @@ public class LearningRequestService {
     }
     private void calculateExtraTokens(LearningRequest learningRequest) {
         if (learningRequest.getWeekend()!=null&&learningRequest.getWeekend()) {
-            learningRequest.setWeekendTokens(2);
+            learningRequest.setWeekendTokens(1);
         } else {
             learningRequest.setWeekendTokens(0);
         }
     }
+
 }

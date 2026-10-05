@@ -73,4 +73,8 @@ public class SkillOffer {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "skillOffer")
     private Set<Session> sessions;
+
+    @OneToMany(mappedBy = "skillOffer")
+    @JsonIgnore
+    private Set<LearningRequest> learningRequests;
 }
