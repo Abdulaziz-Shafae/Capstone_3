@@ -29,7 +29,10 @@ public class TokenTransaction {
     private Integer amount;
 
     @NotNull(message = "The transaction type can't be null")
-    @Pattern(regexp = "^(STARTING|TEACHING|LEARNING|BONUS|REFUND|PURCHASE|REDEMPTION)$", message = "The transaction type must be STARTING, TEACHING, LEARNING, BONUS, REFUND, PURCHASE or REDEMPTION")
+    @Pattern(
+            regexp = "^(STARTING|TEACHING|LEARNING|BONUS|REFUND)$",
+            message = "The transaction type must be STARTING, TEACHING, LEARNING, BONUS, or REFUND"
+    )
     @Column(columnDefinition = "VARCHAR(20) not null")
     private String type;
 
