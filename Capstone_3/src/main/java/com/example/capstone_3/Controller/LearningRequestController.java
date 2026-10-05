@@ -20,9 +20,9 @@ public class LearningRequestController {
         return ResponseEntity.status(200).body(learningRequestService.getAllLearningRequests());
     }
 
-    @PostMapping("/add/{accountId}/{skillId}/{providerAccountId}")
-    public ResponseEntity<?> addLearningRequest(@PathVariable Integer accountId, @PathVariable Integer skillId, @PathVariable Integer providerAccountId, @RequestBody @Valid LearningRequest learningRequest){
-        learningRequestService.addLearningRequest(accountId, skillId, providerAccountId, learningRequest);
+    @PostMapping("/add/{accountId}/{skillId}")
+    public ResponseEntity<?> addLearningRequest(@PathVariable Integer accountId, @PathVariable Integer skillId, @RequestBody @Valid LearningRequest learningRequest) {
+        learningRequestService.addLearningRequest(accountId, skillId, learningRequest);
         return ResponseEntity.status(200).body(new ApiResponse("Learning request added"));
     }
 

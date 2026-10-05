@@ -88,13 +88,4 @@ public class LearningRequest {
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "learningRequest")
     private Exchange exchange;
 
-    @ManyToOne
-    @JoinColumn(name = "provider_account_id", referencedColumnName = "id")
-    @JsonIgnore
-    private Account providerAccount;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "learningRequest")
-    private Set<RequestNegotiation> requestNegotiations;
-
-
 }

@@ -1,11 +1,8 @@
 package com.example.capstone_3.Controller;
 
-import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.AccountDtoIn;
-import com.example.capstone_3.DtoIn.LoginDtoIn;
 import com.example.capstone_3.Service.AccountService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,29 +40,6 @@ public class AccountController {
     public ResponseEntity<?> delete(@PathVariable Integer id){
         accountService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("account deleted"));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginDtoIn loginDtoIn, HttpSession session){
-
-        Integer accountId = accountService.login(loginDtoIn);
-
-        session.setAttribute("accountId", accountId);
-
-        return ResponseEntity.status(200).body(new ApiResponse("Logged in successfully"));
-    }
-
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session){
-
-        if((Integer) session.getAttribute("accountId") == null){
-            throw new ApiException("Already logged out");
-        }
-
-        session.invalidate();
-
-        return ResponseEntity.status(200).body(new ApiResponse("Logged out successfully"));
     }
 
 }
