@@ -24,48 +24,26 @@ public class LearningRequestService {
         return learningRequestRepository.findAll();
     }
 
-    public void addLearningRequest(Integer accountId, Integer skillId, Integer providerAccountId, LearningRequest learningRequest){
-
+    public void addLearningRequest(Integer accountId, Integer skillId, LearningRequest learningRequest) {
         Account account = accountRepository.findAccountById(accountId);
-
-        if(account == null){
+        if (account == null) {
             throw new ApiException("Account not found");
         }
-
         Skill skill = skillRepository.findSkillById(skillId);
-
-        if(skill == null){
+        if (skill == null) {
             throw new ApiException("Skill not found");
         }
-
-        Account providerAccount = accountRepository.findAccountById(providerAccountId);
-
-        if(providerAccount == null){
-            throw new ApiException("Provider account not found");
-        }
-
-        if(accountId.equals(providerAccountId)){
-            throw new ApiException("Requester and provider must be different");
-        }
-
         calculateExtraTokens(learningRequest);
-
-        if(account.getTokenBalance() < totalTokens(learningRequest)){
+        if (account.getTokenBalance()<totalTokens(learningRequest)) {
             throw new ApiException("Not enough tokens");
         }
-
-        learningRequest.setId(null);
-        learningRequest.setExchange(null);
-        learningRequest.setRequestNegotiations(null);
-
         learningRequest.setRequesterAccount(account);
-        learningRequest.setProviderAccount(providerAccount);
         learningRequest.setSkill(skill);
         learningRequest.setStatus("OPEN");
         learningRequest.setCreatedAt(LocalDateTime.now());
-
         learningRequestRepository.save(learningRequest);
-    }
+
+}
 
 
     public void updateLearningRequest(Integer id, LearningRequest learningRequest){
