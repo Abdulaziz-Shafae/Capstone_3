@@ -1,7 +1,9 @@
 package com.example.capstone_3.Controller;
 
+import com.example.capstone_3.DtoIn.AIAssessmentDtoIn;
 import com.example.capstone_3.Service.AIService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +37,29 @@ public class AIController {
     @GetMapping("/cv/suggest-offers")
     public ResponseEntity<?> suggestOffers(HttpSession session) {
         return ResponseEntity.ok(aiService.suggestOffers((Integer) session.getAttribute("accountId")));
+    }
+    // === Deema: AI Skill endpoints ( 5   8 ) =====
+    //5
+    @GetMapping("/skill/relationships/{skillId}")
+    public ResponseEntity<?> skillRelationships(@PathVariable Integer skillId, HttpSession session) {
+        return ResponseEntity.status(200).body(aiService.analyzeSkillRelationships((Integer) session.getAttribute("accountId"), skillId));
+    }
+
+    //6
+    @GetMapping("/skill/{skillId}/related-providers")
+    public ResponseEntity<?> relatedProviders(@PathVariable Integer skillId, HttpSession session) {
+        return ResponseEntity.status(200).body(aiService.suggestRelatedProviders((Integer) session.getAttribute("accountId"), skillId));
+    }
+
+    //7
+    @PostMapping("/assessment/generate/{accountSkillId}")
+    public ResponseEntity<?> generateAssessment(@PathVariable Integer accountSkillId, HttpSession session) {
+        return ResponseEntity.status(200).body(aiService.generateAssessment((Integer) session.getAttribute("accountId"), accountSkillId));
+    }
+
+    //8
+    @PostMapping("/assessment/evaluate/{accountSkillId}")
+    public ResponseEntity<?> evaluateAssessment(@PathVariable Integer accountSkillId, @RequestBody @Valid AIAssessmentDtoIn input, HttpSession session) {
+        return ResponseEntity.status(200).body(aiService.evaluateAssessment((Integer) session.getAttribute("accountId"), accountSkillId, input));
     }
 }
