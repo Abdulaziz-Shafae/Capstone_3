@@ -79,9 +79,6 @@ public class AIService {
 
     public Map<String, Object> calculateMatch(Integer learnerId, Integer skillId) {
         Account learner = accountAccessService.requireActive(learnerId);
-        if (learner == null) {
-            throw new ApiException("No learner account found");
-        }
 
         Skill skill = skillRepository.findSkillById(skillId);
         if (skill == null) {
@@ -138,9 +135,6 @@ public class AIService {
 
     public Map<String, Object> explainMatch(Integer learnerId, Integer providerId, Integer skillId) {
         Account learner = accountAccessService.requireActive(learnerId);
-        if (learner == null) {
-            throw new ApiException("No learner account found");
-        }
 
         Account provider = accountRepository.findAccountById(providerId);
         if (provider == null) {
@@ -191,17 +185,7 @@ public class AIService {
     }
 
     public Map<String, Object> extractSkills(Integer accountId, MultipartFile file) throws IOException {
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-        Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
-            throw new ApiException("No account found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if (file == null || file.isEmpty()) {
             throw new ApiException("Please upload a PDF file");
@@ -291,11 +275,7 @@ public class AIService {
     }
 
     public Map<String, Object> suggestOffers(Integer accountId) {
-        accountAccessService.requireActive(accountId);
-        Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
-            throw new ApiException("No account found");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         List<AccountSkill> accountSkills = getAccountSkills(accountId);
 

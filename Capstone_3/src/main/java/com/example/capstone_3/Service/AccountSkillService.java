@@ -32,9 +32,6 @@ public class AccountSkillService {
 
     public void addAccountSkill(Integer accountId,Integer skillId){
         Account account=accountAccessService.requireActive(accountId);
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
         Skill skill=skillRepository.findSkillById(skillId);
         if (skill == null) {
             throw new ApiException("Skill not found");

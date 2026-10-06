@@ -21,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TokenTransactionService {
+    private final AccountAccessService accountAccessService;
 
     private final TokenTransactionRepository tokenTransactionRepository;
     private final AccountRepository accountRepository;
@@ -117,13 +118,13 @@ public class TokenTransactionService {
 
     //43 done
     public Integer getBalance(Integer accountId){
-        Account account=getAccount(accountId);
+        Account account=accountAccessService.requireExisting(accountId);
         return account.getTokenBalance();
     }
 
     //44 done
     public List<TokenTransactionDtoOut>getHistory(Integer accountId){
-        Account account=getAccount(accountId);
+        Account account=accountAccessService.requireExisting(accountId);
         List<TokenTransaction> transactions = tokenTransactionRepository.findAllByAccountOrderByCreatedAtDesc(account);
         List<TokenTransactionDtoOut> result = new ArrayList<>();
         for (TokenTransaction t : transactions) {
@@ -147,7 +148,7 @@ public class TokenTransactionService {
     // #45 Give bonus tokens (every 5 completed teachings = 5 bonus tokens)
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void giveBonus(Integer accountId) {
-        Account account = getActiveAccountForTokenUpdate(accountId);
+        Account account = accountAccessService.requireForTokenUpdate(accountId);
 
         //completed exchanges where he was the teacher
         int teachings = exchangeRepository.countCompletedTeachings(account);
@@ -171,7 +172,7 @@ public class TokenTransactionService {
     // #46
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void refundExchange(Integer accountId, Integer exchangeId) {
-        getActiveAccount(accountId);
+        accountAccessService.requireActive(accountId);
         Exchange exchange=exchangeRepository.findExchangeForUpdate(exchangeId);
         if (exchange==null) {
             throw new ApiException("Exchange not found");
@@ -205,7 +206,7 @@ public class TokenTransactionService {
         if (payment.getAccount() == null || !accountId.equals(payment.getAccount().getId()) || payment.getAmount() == null || payment.getAmount() >= 0 || payment.getAmount() == Integer.MIN_VALUE) {
             throw new ApiException("Exchange payment is invalid");
         }
-        Account learner = getActiveAccountForTokenUpdate(accountId);
+        Account learner = accountAccessService.requireForTokenUpdate(accountId);
         int refundAmount = -payment.getAmount();
         if (!Integer.valueOf(refundAmount).equals(exchange.getTokenAmount())) {
             throw new ApiException("Refund does not match the exchange token amount");
@@ -227,7 +228,7 @@ public class TokenTransactionService {
         if (amount > 1000) {
             throw new ApiException("You can purchase at most 1000 tokens at once");
         }
-        Account account = getActiveAccountForTokenUpdate(accountId);
+        Account account = accountAccessService.requireForTokenUpdate(accountId);
         if (accountRepository.refundTokens(accountId, amount) != 1) {
             throw new ApiException("Unable to credit purchased tokens");
         }
@@ -245,7 +246,7 @@ public class TokenTransactionService {
         if (amount<5) {
             throw new ApiException("Minimum redeem is 5 tokens");
         }
-        Account account = getActiveAccountForTokenUpdate(accountId);
+        Account account = accountAccessService.requireForTokenUpdate(accountId);
         if (account.getTokenBalance()<amount) {
             throw new ApiException("Not enough tokens");
         }
@@ -258,42 +259,12 @@ public class TokenTransactionService {
 
     //nvm methods
 
-    private Account getAccount(Integer accountId) {
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-        Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-        return account;
-    }
+
 
     //sure it is active
-    private Account getActiveAccount(Integer accountId) {
-        Account account = getAccount(accountId);
-        if (!account.getStatus().equals("ACTIVE")) {
-            throw new ApiException("Account is not active");
-        }
-        return account;
-    }
 
-    private Account getActiveAccountForTokenUpdate(Integer accountId) {
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-        Account account = accountRepository.findAccountForTokenUpdate(accountId);
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
-        if (account.getTokenBalance() == null) {
-            throw new ApiException("Account token balance is invalid");
-        }
-        return account;
-    }
+
+
     private void saveTransaction(Account account, Exchange exchange, Integer amount, String type, String description) {
         TokenTransaction transaction = new TokenTransaction();
         transaction.setAccount(account);

@@ -2,13 +2,11 @@ package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.DtoIn.SessionDtoIn;
-import com.example.capstone_3.Model.Account;
 import com.example.capstone_3.Model.Exchange;
 import com.example.capstone_3.Model.Session;
 import com.example.capstone_3.Model.SessionParticipant;
 import com.example.capstone_3.Model.SkillOffer;
 import com.example.capstone_3.Repository.ExchangeRepository;
-import com.example.capstone_3.Repository.AccountRepository;
 import com.example.capstone_3.Repository.SessionParticipantRepository;
 import com.example.capstone_3.Repository.SessionRepository;
 import com.example.capstone_3.Repository.SkillOfferRepository;
@@ -20,12 +18,12 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SessionService {
+    private final AccountAccessService accountAccessService;
 
     private final SessionRepository sessionRepository;
     private final SkillOfferRepository skillOfferRepository;
     private final ExchangeRepository exchangeRepository;
     private final SessionParticipantRepository sessionParticipantRepository;
-    private final AccountRepository accountRepository;
 
     public List<Session> get() {
         return sessionRepository.findAll();
@@ -87,7 +85,7 @@ public class SessionService {
     }
 
     public void createSession(Integer accountId, Integer offerId, SessionDtoIn sessionDtoIn) {
-        requireActiveAccount(accountId);
+        accountAccessService.requireActive(accountId);
         SkillOffer skillOffer = skillOfferRepository.findSkillOfferById(offerId);
 
         if (skillOffer == null) {
@@ -114,7 +112,7 @@ public class SessionService {
     }
 
     public void joinSession(Integer accountId, Integer sessionId, Integer exchangeId) {
-        requireActiveAccount(accountId);
+        accountAccessService.requireActive(accountId);
         Session session = sessionRepository.findSessionById(sessionId);
 
         if (session == null) {
@@ -160,7 +158,7 @@ public class SessionService {
     }
 
     public void updateAttendance(Integer accountId, Integer sessionId, Integer exchangeId, String status) {
-        requireActiveAccount(accountId);
+        accountAccessService.requireActive(accountId);
         Session session = sessionRepository.findSessionById(sessionId);
         if (session == null) {
             throw new ApiException("No session found");
@@ -191,7 +189,7 @@ public class SessionService {
     }
 
     public List<Session> getSessionsByExchange(Integer accountId, Integer exchangeId) {
-        requireActiveAccount(accountId);
+        accountAccessService.requireActive(accountId);
         Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
 
         if (exchange == null) {
@@ -207,18 +205,7 @@ public class SessionService {
         return sessionRepository.findDistinctBySessionParticipants_Exchange_Id(exchangeId);
     }
 
-    private void requireActiveAccount(Integer accountId) {
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-        Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
-    }
+
 
     private void requireProvider(Integer accountId, SkillOffer skillOffer) {
         if (skillOffer == null || skillOffer.getProviderAccount() == null || !accountId.equals(skillOffer.getProviderAccount().getId())) {

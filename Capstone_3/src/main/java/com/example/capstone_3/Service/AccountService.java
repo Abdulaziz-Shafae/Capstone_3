@@ -25,6 +25,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AccountService {
+    private final AccountAccessService accountAccessService;
 
     private final AccountRepository accountRepository;
     private final IndividualProfileRepository individualProfileRepository;
@@ -105,9 +106,7 @@ public class AccountService {
             throw new ApiException("Invalid email or password");
         }
 
-        if (!"ACTIVE".equals(oldAcc.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        accountAccessService.checkActive(oldAcc);
 
         return oldAcc.getId();
     }
@@ -190,19 +189,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public Object getFullProfile(Integer accountId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if ("INDIVIDUAL".equals(account.getAccountType())) {
 
@@ -232,19 +219,7 @@ public class AccountService {
     @Transactional
     public DashboardDtoOut getDashboard(Integer accountId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         Map<String, Long> exchangesByStatus = new LinkedHashMap<>();
 

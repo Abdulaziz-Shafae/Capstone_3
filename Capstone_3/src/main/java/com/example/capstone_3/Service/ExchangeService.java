@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ExchangeService {
+    private final AccountAccessService accountAccessService;
 
     private final ExchangeRepository exchangeRepository;
     private final AccountRepository accountRepository;
@@ -72,19 +73,7 @@ public class ExchangeService {
     @Transactional
     public void createExchange(Integer accountId, Integer requestId, Integer offerId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if (!Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Please verify your email first");
@@ -200,19 +189,7 @@ public class ExchangeService {
     @Transactional
     public ExchangeDtoOut getExchangeDetails(Integer accountId, Integer exchangeId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
 
@@ -376,19 +353,7 @@ public class ExchangeService {
 
     private Exchange getExchangeForAction(Integer accountId, Integer exchangeId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         Exchange exchange = exchangeRepository.findExchangeForUpdate(exchangeId);
 
@@ -426,19 +391,7 @@ public class ExchangeService {
     @Transactional
     public List<ExchangeDtoOut> getAccountExchanges(Integer accountId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         List<Exchange> exchanges = exchangeRepository.findExchangesRelatedToAccount(accountId);
         List<ExchangeDtoOut> exchangesDtoOut = new ArrayList<>();

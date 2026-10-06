@@ -24,6 +24,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RequestNegotiationService {
+    private final AccountAccessService accountAccessService;
 
     private final RequestNegotiationRepository requestNegotiationRepository;
     private final LearningRequestRepository learningRequestRepository;
@@ -36,19 +37,7 @@ public class RequestNegotiationService {
 
     @Transactional
     public void respond(Integer accountId, Integer requestId, RequestNegotiationDtoIn dtoIn) {
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if (!Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Please verify your email first");
@@ -230,19 +219,7 @@ public class RequestNegotiationService {
 
     private LearningRequest checkRequestAccess(Integer accountId, Integer requestId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         LearningRequest learningRequest = learningRequestRepository.findLearningRequestById(requestId);
 
@@ -326,19 +303,7 @@ public class RequestNegotiationService {
     @Transactional
     public void acceptProposal(Integer accountId, Integer negotiationId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is not active");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if (!Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Please verify your email first");

@@ -18,6 +18,7 @@ import java.util.HexFormat;
 @Service
 @RequiredArgsConstructor
 public class EmailVerificationService {
+    private final AccountAccessService accountAccessService;
 
     private final AccountRepository accountRepository;
     private final BrevoEmailService brevoEmailService;
@@ -29,15 +30,7 @@ public class EmailVerificationService {
     @Transactional
     public void sendVerificationEmail(Integer accountId) {
 
-        Account account = accountRepository.findAccountForVerification(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        Account account = accountAccessService.requireForVerification(accountId);
 
         if (Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Email is already verified");
@@ -77,9 +70,7 @@ public class EmailVerificationService {
             throw new ApiException("Invalid verification link");
         }
 
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        accountAccessService.checkActive(account);
 
         if (Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Email is already verified");

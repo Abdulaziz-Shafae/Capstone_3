@@ -33,19 +33,7 @@ public class LearningRequestService {
     @Transactional
     public void addLearningRequest(Integer accountId, Integer offerId, CreateLearningRequestDtoIn dtoIn) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         if (!Boolean.TRUE.equals(account.getEmailVerified())) {
             throw new ApiException("Please verify your email first");
@@ -154,19 +142,7 @@ public class LearningRequestService {
     @Transactional
     public LearningRequestDtoOut getLearningRequestById(Integer requestId, Integer accountId) {
 
-        if (accountId == null) {
-            throw new ApiException("Please log in first");
-        }
-
-        Account account = accountRepository.findAccountById(accountId);
-
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
-
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new ApiException("Account is suspended or blocked");
-        }
+        Account account = accountAccessService.requireActive(accountId);
 
         LearningRequest learningRequest = learningRequestRepository.findLearningRequestById(requestId);
 

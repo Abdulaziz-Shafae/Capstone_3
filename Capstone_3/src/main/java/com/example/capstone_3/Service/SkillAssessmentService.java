@@ -28,10 +28,6 @@ public class SkillAssessmentService {
 
     public void addSkillAssessment(Integer accountId, Integer accountSkillId, SkillAssessment skillAssessment) {
         accountAccessService.requireActive(accountId);
-
-        if (accountId == null) {
-            throw new ApiException("Please login first");
-        }
         AccountSkill accountSkill = accountSkillRepository.findAccountSkillById(accountSkillId);
         if (accountSkill == null) {
             throw new ApiException("Account skill not found");

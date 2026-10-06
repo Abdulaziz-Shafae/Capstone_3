@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+    private final AccountAccessService accountAccessService;
 
     private final ReviewRepository reviewRepository;
     private final ExchangeRepository exchangeRepository;
@@ -50,9 +51,7 @@ public class ReviewService {
     }
 
     public void add(Integer exchangeId, Integer reviewerId, CreateReviewDtoIn dto) {
-        if (reviewerId == null) {
-            throw new ApiException("Please log in first");
-        }
+        Account reviewer = accountAccessService.requireActive(reviewerId);
         Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
 
         if (exchange == null) {
@@ -75,14 +74,6 @@ public class ReviewService {
         Integer otherAccountId = reviewerId.equals(learnerId) ? providerId : learnerId;
         if (!otherAccountId.equals(dto.getReviewedAccountId())) {
             throw new ApiException("You can only review the other exchange participant");
-        }
-
-        Account reviewer = accountRepository.findAccountById(reviewerId);
-        if (reviewer == null) {
-            throw new ApiException("No reviewer account found");
-        }
-        if (!"ACTIVE".equals(reviewer.getStatus())) {
-            throw new ApiException("Account is not active");
         }
 
         Account reviewed = accountRepository.findAccountById(dto.getReviewedAccountId());
