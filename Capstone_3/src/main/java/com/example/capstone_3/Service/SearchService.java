@@ -1,7 +1,7 @@
 package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
-import com.example.capstone_3.DtoOut.LearningRequestDtoOut;
+import com.example.capstone_3.DtoOut.LearningRequestSearchDtoOut;
 import com.example.capstone_3.DtoOut.ProviderDtoOut;
 import com.example.capstone_3.Model.*;
 import com.example.capstone_3.Repository.AccountSkillRepository;
@@ -49,18 +49,18 @@ public class SearchService {
         return result;
     }
 
-    public List<LearningRequestDtoOut> findRequestsBySkill(Integer skillId) {
+    public List<LearningRequestSearchDtoOut> findRequestsBySkill(Integer skillId) {
         Skill skill = skillRepository.findSkillById(skillId);
         if (skill == null) {
             throw new ApiException("Skill not found");
         }
         List<LearningRequest> requests = learningRequestRepository.findAllBySkillAndStatus(skill, "OPEN");
-        List<LearningRequestDtoOut> result = new ArrayList<>();
+        List<LearningRequestSearchDtoOut> result = new ArrayList<>();
 
         for (LearningRequest r : requests) {
             Account requester = r.getRequesterAccount();
             Account provider = r.getProviderAccount();
-            LearningRequestDtoOut dto = new LearningRequestDtoOut();
+            LearningRequestSearchDtoOut dto = new LearningRequestSearchDtoOut();
             if (provider != null) {
                 dto.setProviderAccountId(provider.getId());
                 dto.setProviderName(getAccountName(provider));
