@@ -26,6 +26,12 @@ public class RequestNegotiation {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(columnDefinition = "int not null default 0")
+    private Integer urgentTokens = 0;
+
+    @Column(columnDefinition = "int not null default 0")
+    private Integer weekendTokens = 0;
+
     @ManyToOne
     @JoinColumn(name = "learning_request_id", nullable = false)
     @JsonIgnore

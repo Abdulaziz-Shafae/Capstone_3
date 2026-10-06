@@ -43,7 +43,7 @@ public class CompanyProfile {
             message = "Phone must be 10 digits and start with 05"
     )*/
     @Check(constraints = "phone REGEXP '^05[0-9]{8}$'")
-    @Column(columnDefinition = "VARCHAR(10) not null")
+    @Column(columnDefinition = "VARCHAR(10) not null unique")
     private String phone;
 
 

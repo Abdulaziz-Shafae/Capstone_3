@@ -56,6 +56,9 @@ public class Exchange {
     @Column(columnDefinition = "DATETIME")
     private LocalDateTime completedAt;
 
+    @Column(nullable = false)
+    private Boolean tokensReserved = false;
+
 
    // LearningRequest 1 : 0..1 Exchange
     // Exchange is the child

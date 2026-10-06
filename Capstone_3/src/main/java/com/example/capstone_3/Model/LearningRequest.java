@@ -58,7 +58,6 @@ public class LearningRequest {
     @Column(columnDefinition = "int not null default 0")
     private Integer weekendTokens = 0;
 
-    @Future(message = "Needed by must be a future date")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(columnDefinition = "datetime")
     private LocalDateTime neededBy;
@@ -96,5 +95,14 @@ public class LearningRequest {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "learningRequest")
     private Set<RequestNegotiation> requestNegotiations;
 
+    @ManyToOne
+    @JoinColumn(name = "skill_offer_id")
+    @JsonIgnore
+    private SkillOffer skillOffer;
+
+    @ManyToOne
+    @JoinColumn(name = "accepted_negotiation_id", referencedColumnName = "id")
+    @JsonIgnore
+    private RequestNegotiation acceptedNegotiation;
 
 }

@@ -3,6 +3,7 @@ package com.example.capstone_3.Controller;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.ExchangeDtoIn;
 import com.example.capstone_3.Service.ExchangeService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +43,47 @@ public class ExchangeController {
         return ResponseEntity.status(200).body(new ApiResponse("exchange deleted"));
     }
 
+    @PostMapping("/create/{requestId}/{offerId}")
+    public ResponseEntity<?> createExchange(@PathVariable Integer requestId, @PathVariable Integer offerId, HttpSession session) {
+        exchangeService.createExchange((Integer) session.getAttribute("accountId"), requestId, offerId);
+        return ResponseEntity.status(200).body(new ApiResponse("Exchange created successfully"));
+    }
+
+    @GetMapping("/{exchangeId}")
+    public ResponseEntity<?> getExchangeDetails(@PathVariable Integer exchangeId, HttpSession session) {
+        return ResponseEntity.status(200).body(exchangeService.getExchangeDetails((Integer) session.getAttribute("accountId"), exchangeId));
+    }
+
+    @PutMapping("/{exchangeId}/accept")
+    public ResponseEntity<?> acceptExchange(@PathVariable Integer exchangeId, HttpSession session) {
+        exchangeService.acceptExchange((Integer) session.getAttribute("accountId"), exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Exchange accepted successfully"));
+    }
+
+    @PutMapping("/{exchangeId}/cancel")
+    public ResponseEntity<?> cancelExchange(@PathVariable Integer exchangeId, HttpSession session) {
+        exchangeService.cancelExchange((Integer) session.getAttribute("accountId"), exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Exchange cancelled successfully"));
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<?> getAccountExchanges(HttpSession session) {
+        return ResponseEntity.status(200).body(exchangeService.getAccountExchanges((Integer) session.getAttribute("accountId")));
+    }
+
+
+
     @PutMapping("/{exchangeId}/complete")
     public ResponseEntity<?> completeExchange(
-            @PathVariable Integer exchangeId) {
+            @PathVariable Integer exchangeId, HttpSession session) {
 
-        exchangeService.completeExchange(exchangeId);
+        exchangeService.completeExchange((Integer) session.getAttribute("accountId"), exchangeId);
 
         return ResponseEntity.ok(
                 new ApiResponse("Exchange completed successfully")
         );
     }
+
 
 
 }
