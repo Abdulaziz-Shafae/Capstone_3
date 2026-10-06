@@ -45,7 +45,12 @@ public class Session {
     @Column(columnDefinition = "VARCHAR(20) not null")
     private String mode;
 
+    @Column(length = 2000)
     private String meetingLink;
+
+    @JsonIgnore
+    @Column(unique = true)
+    private Long zoomMeetingId;
 
     private String location;
 

@@ -1,7 +1,10 @@
 package com.example.capstone_3.Controller;
 
+import com.example.capstone_3.DtoIn.LinkedInAddSkillsDtoIn;
+import com.example.capstone_3.DtoIn.LinkedInProfileDtoIn;
 import com.example.capstone_3.Service.AIService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +38,29 @@ public class AIController {
     @GetMapping("/cv/suggest-offers")
     public ResponseEntity<?> suggestOffers(HttpSession session) {
         return ResponseEntity.ok(aiService.suggestOffers((Integer) session.getAttribute("accountId")));
+    }
+
+    @PostMapping("/exchange/fairness/{requestId}/{offerId}")
+    public ResponseEntity<?> exchangeFairness(@PathVariable Integer requestId, @PathVariable Integer offerId, HttpSession session) {
+
+        return ResponseEntity.status(200).body(aiService.checkExchangeFairness((Integer) session.getAttribute("accountId"), requestId, offerId));
+    }
+
+    @PostMapping("/agreement/generate/{exchangeId}")
+    public ResponseEntity<?> generateAgreement(@PathVariable Integer exchangeId, HttpSession session) {
+
+        return ResponseEntity.status(200).body(aiService.generateAgreement((Integer) session.getAttribute("accountId"), exchangeId));
+    }
+
+    @PostMapping("/linkedin/get-skills")
+    public ResponseEntity<?> getLinkedInSkills( @RequestBody @Valid LinkedInProfileDtoIn linkedInProfileDtoIn, HttpSession session) {
+
+        return ResponseEntity.status(200).body(aiService.getLinkedInSkills((Integer) session.getAttribute("accountId"), linkedInProfileDtoIn));
+    }
+
+    @PostMapping("/linkedin/add-skills")
+    public ResponseEntity<?> addLinkedInSkills(@RequestBody @Valid LinkedInAddSkillsDtoIn linkedInAddSkillsDtoIn, HttpSession session) {
+
+        return ResponseEntity.status(200).body(aiService.addLinkedInSkills((Integer) session.getAttribute("accountId"), linkedInAddSkillsDtoIn));
     }
 }
