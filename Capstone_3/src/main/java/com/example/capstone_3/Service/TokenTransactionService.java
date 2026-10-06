@@ -26,6 +26,7 @@ public class TokenTransactionService {
     private final TokenTransactionRepository tokenTransactionRepository;
     private final AccountRepository accountRepository;
     private final ExchangeRepository exchangeRepository;
+    private final BrevoEmailService brevoEmailService;
 
     public List<TokenTransaction> get() {
         return tokenTransactionRepository.findAll();
@@ -168,6 +169,14 @@ public class TokenTransactionService {
         accountRepository.save(account);
         saveTransaction(account, null, BonusAmount, "BONUS",
                 "Bonus for completing " + (deserved * teachingForBonus) + " teachings");
+
+        notifyByEmail(account, "You earned bonus tokens!",
+                "Hello,\n\n"
+                        + "Congratulations! You have completed " + (deserved * teachingForBonus) + " teaching sessions.\n\n"
+                        + "Bonus tokens: " + BonusAmount + "\n"
+                        + "New balance: " + account.getTokenBalance() + " tokens\n\n"
+                        + "Keep teaching to earn more rewards!\n\n"
+                        + "Thank you for using Skill Exchange!");
     }
     // #46
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -211,12 +220,21 @@ public class TokenTransactionService {
         if (!Integer.valueOf(refundAmount).equals(exchange.getTokenAmount())) {
             throw new ApiException("Refund does not match the exchange token amount");
         }
+        int oldBalance = learner.getTokenBalance();
         if (accountRepository.refundTokens(accountId, refundAmount) != 1) {
             throw new ApiException("Unable to refund tokens");
         }
         saveTransaction(learner, exchange, refundAmount, "REFUND", "Refund for cancelled exchange");
         exchange.setTokensReserved(false);
         exchangeRepository.save(exchange);
+        notifyByEmail(learner, "Your tokens have been refunded",
+                "Hello,\n\n"
+                        + "Your tokens have been refunded for the cancelled exchange.\n\n"
+                        + "Exchange: #" + exchangeId + "\n"
+                        + "Tokens refunded: " + refundAmount + "\n"
+                        + "New balance: " + (oldBalance + refundAmount) + " tokens\n\n"
+                        + "Thank you for using Skill Exchange!");
+
     }
 
     // 47 Purchase tokens using money
@@ -229,11 +247,19 @@ public class TokenTransactionService {
             throw new ApiException("You can purchase at most 1000 tokens at once");
         }
         Account account = accountAccessService.requireForTokenUpdate(accountId);
+        int oldBalance = account.getTokenBalance();
         if (accountRepository.refundTokens(accountId, amount) != 1) {
             throw new ApiException("Unable to credit purchased tokens");
         }
         int price = amount * tokenPrice;
         saveTransaction(account, null, amount, "PURCHASE", "Simulated purchase of " + amount + " tokens for " + price + " SAR; no real payment processed");
+        notifyByEmail(account, "Your token purchase was successful",
+                "Hello,\n\n"
+                        + "Your token purchase has been completed successfully.\n\n"
+                        + "Tokens purchased: " + amount + "\n"
+                        + "Price: " + price + " SAR\n"
+                        + "New balance: " + (oldBalance + amount) + " tokens\n\n"
+                        + "Thank you for using Skill Exchange!");
         return price;
     }
 
@@ -249,6 +275,9 @@ public class TokenTransactionService {
         Account account = accountAccessService.requireForTokenUpdate(accountId);
         if (account.getTokenBalance()<amount) {
             throw new ApiException("Not enough tokens");
+        }
+        if (account.getTokenBalance()-amount<3) {
+            throw new ApiException("You must keep at least 3 tokens after redemption");
         }
         account.setTokenBalance(account.getTokenBalance()-amount);
         accountRepository.save(account);
@@ -274,6 +303,15 @@ public class TokenTransactionService {
         transaction.setDescription(description);
         transaction.setCreatedAt(LocalDateTime.now());
         tokenTransactionRepository.save(transaction);
+    }
+
+    private void notifyByEmail(Account account, String subject, String text) {
+        try {
+            brevoEmailService.sendEmail(account.getEmail(), subject, text);
+            System.out.println("EMAIL SENT to " + account.getEmail());   // ← مؤقت
+        } catch (Exception e) {
+            System.out.println("Email not sent to " + account.getEmail() + ": " + e.getMessage());
+        }
     }
 
 
