@@ -103,7 +103,52 @@ public class LearningRequestService {
     }
 
 
+    public List<LearningRequest> getOpenLearningRequests() {
+        return learningRequestRepository.findByStatus("OPEN");
+    }
 
+    public List<LearningRequest> getLearningRequestsBySkill(Integer skillId) {
+        if (skillRepository.findSkillById(skillId) == null) {
+            throw new ApiException("Skill not found");
+        }
+
+        return learningRequestRepository.findBySkill_IdAndStatus(skillId, "OPEN");
+    }
+
+    public List<LearningRequest> getRequestsByRequester(Integer accountId) {
+        if (accountRepository.findAccountById(accountId) == null) {
+            throw new ApiException("Account not found");
+        }
+
+        return learningRequestRepository.findByRequesterAccount_Id(accountId);
+    }
+
+    public List<LearningRequest> getRequestsByProvider(Integer accountId) {
+        if (accountRepository.findAccountById(accountId) == null) {
+            throw new ApiException("Account not found");
+        }
+
+        return learningRequestRepository.findByProviderAccount_Id(accountId);
+    }
+
+    public List<LearningRequest> getUrgentLearningRequests() {
+        return learningRequestRepository.findByUrgentTrueAndStatus("OPEN");
+    }
+
+    public void cancelLearningRequest(Integer requestId) {
+        LearningRequest request = learningRequestRepository.findLearningRequestById(requestId);
+
+        if (request == null) {
+            throw new ApiException("Learning request not found");
+        }
+
+        if (!"OPEN".equals(request.getStatus())) {
+            throw new ApiException("Only open requests can be cancelled");
+        }
+
+        request.setStatus("CANCELLED");
+        learningRequestRepository.save(request);
+    }
 
 
 // نرجع لها

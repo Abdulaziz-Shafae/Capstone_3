@@ -37,4 +37,36 @@ public class LearningRequestController {
         learningRequestService.deleteLearningRequest(id);
         return ResponseEntity.status(200).body(new ApiResponse("Learning request deleted"));
     }
+
+    @GetMapping("/open")
+    public ResponseEntity<?> getOpenLearningRequests() {
+        return ResponseEntity.ok(learningRequestService.getOpenLearningRequests());
+    }
+
+    @GetMapping("/skill/{skillId}")
+    public ResponseEntity<?> getLearningRequestsBySkill(@PathVariable Integer skillId) {
+        return ResponseEntity.ok(learningRequestService.getLearningRequestsBySkill(skillId));
+    }
+
+    @GetMapping("/requester/{accountId}")
+    public ResponseEntity<?> getRequestsByRequester(@PathVariable Integer accountId) {
+        return ResponseEntity.ok(learningRequestService.getRequestsByRequester(accountId));
+    }
+
+    @GetMapping("/provider/{accountId}")
+    public ResponseEntity<?> getRequestsByProvider(@PathVariable Integer accountId) {
+        return ResponseEntity.ok(learningRequestService.getRequestsByProvider(accountId));
+    }
+
+    @GetMapping("/urgent")
+    public ResponseEntity<?> getUrgentLearningRequests() {
+        return ResponseEntity.ok(learningRequestService.getUrgentLearningRequests());
+    }
+
+    @PutMapping("/{requestId}/cancel")
+    public ResponseEntity<?> cancelLearningRequest(@PathVariable Integer requestId) {
+        learningRequestService.cancelLearningRequest(requestId);
+        return ResponseEntity.ok(new ApiResponse("Learning request cancelled"));
+    }
+
 }

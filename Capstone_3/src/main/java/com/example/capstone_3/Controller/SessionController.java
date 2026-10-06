@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/session")
@@ -37,5 +39,32 @@ public class SessionController {
         sessionService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("session deleted"));
     }
-}
 
+    @PostMapping("/create/{offerId}")
+    public ResponseEntity<?> createSession(@PathVariable Integer offerId, @RequestBody @Valid SessionDtoIn sessionDtoIn) {
+        sessionService.createSession(offerId, sessionDtoIn);
+        return ResponseEntity.status(200).body(new ApiResponse("session created"));
+    }
+
+    @PostMapping("/{sessionId}/join/{exchangeId}")
+    public ResponseEntity<?> joinSession(@PathVariable Integer sessionId, @PathVariable Integer exchangeId) {
+        sessionService.joinSession(sessionId, exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Exchange joined the session"));
+    }
+
+    @PutMapping("/{sessionId}/attendance/{exchangeId}")
+    public ResponseEntity<?> updateAttendance(@PathVariable Integer sessionId, @PathVariable Integer exchangeId, @RequestBody Map<String, String> body) {
+        sessionService.updateAttendance(sessionId, exchangeId, body.get("status"));
+        return ResponseEntity.status(200).body(new ApiResponse("Attendance updated"));
+    }
+
+    @GetMapping("/offer/{offerId}")
+    public ResponseEntity<?> getSessionsByOffer(@PathVariable Integer offerId) {
+        return ResponseEntity.status(200).body(sessionService.getSessionsByOffer(offerId));
+    }
+
+    @GetMapping("/exchange/{exchangeId}")
+    public ResponseEntity<?> getSessionsByExchange(@PathVariable Integer exchangeId) {
+        return ResponseEntity.status(200).body(sessionService.getSessionsByExchange(exchangeId));
+    }
+}
