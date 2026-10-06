@@ -3,6 +3,7 @@ package com.example.capstone_3.Controller;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.Model.SkillAssessment;
 import com.example.capstone_3.Service.SkillAssessmentService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,23 @@ public class SkillAssessmentController {
         return ResponseEntity.status(200).body(skillAssessmentService.getAllSkillAssessments());
     }
 
+    // 10 (login required)
     @PostMapping("/take/{accountSkillId}")
-    public ResponseEntity<?> takeSkillAssessment(@PathVariable Integer accountSkillId, @RequestBody @Valid SkillAssessment skillAssessment) {
-        skillAssessmentService.addSkillAssessment(accountSkillId, skillAssessment);
+    public ResponseEntity<?> takeSkillAssessment(HttpSession session, @PathVariable Integer accountSkillId,
+                                                 @RequestBody @Valid SkillAssessment skillAssessment) {
+        skillAssessmentService.addSkillAssessment((Integer) session.getAttribute("accountId"), accountSkillId, skillAssessment);
         return ResponseEntity.status(200).body(new ApiResponse("Skill assessment added"));
+    }
+
+
+    @GetMapping("/history/{accountSkillId}")
+    public ResponseEntity<?> getAssessmentHistory(@PathVariable Integer accountSkillId) {
+        return ResponseEntity.status(200).body(skillAssessmentService.getAssessmentHistory(accountSkillId));
+    }
+
+    @GetMapping("/latest/{accountSkillId}")
+    public ResponseEntity<?> getLatestAssessment(@PathVariable Integer accountSkillId) {
+        return ResponseEntity.status(200).body(skillAssessmentService.getLatestAssessment(accountSkillId));
     }
 
     // Update and Delete are not allowed: assessment results are a permanent record (admin only if needed)

@@ -3,6 +3,7 @@ package com.example.capstone_3.Controller;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.Model.AccountSkill;
 import com.example.capstone_3.Service.AccountSkillService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ public class AccountSkillController {
         return ResponseEntity.status(200).body(accountSkillService.getAccountSkills());
     }
 
-    @PostMapping("/add/{accountId}/{skillId}")
-    public ResponseEntity<?> addAccountSkill(@PathVariable Integer accountId, @PathVariable Integer skillId) {
-        accountSkillService.addAccountSkill(accountId, skillId);
+    @PostMapping("/add/{skillId}")
+    public ResponseEntity<?> addAccountSkill(HttpSession session, @PathVariable Integer skillId) {
+        accountSkillService.addAccountSkill((Integer) session.getAttribute("accountId"), skillId);
         return ResponseEntity.status(200).body(new ApiResponse("Skill added to account"));
     }
 
@@ -36,5 +37,15 @@ public class AccountSkillController {
     public ResponseEntity<?> deleteAccountSkill(@PathVariable Integer id) {
         accountSkillService.deleteAccountSkill(id);
         return ResponseEntity.status(200).body(new ApiResponse("Account skill deleted"));
+    }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<?> getSkillsByAccount(@PathVariable Integer accountId) {
+        return ResponseEntity.status(200).body(accountSkillService.getSkillsByAccount(accountId));
+    }
+
+    @GetMapping("/verified/{accountId}")
+    public ResponseEntity<?> getVerifiedSkillsOfAccount(@PathVariable Integer accountId) {
+        return ResponseEntity.status(200).body(accountSkillService.getVerifiedSkillsOfAccount(accountId));
     }
 }

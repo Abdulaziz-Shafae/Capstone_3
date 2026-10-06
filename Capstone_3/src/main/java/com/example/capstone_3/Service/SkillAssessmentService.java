@@ -25,22 +25,28 @@ public class SkillAssessmentService {
     }
 
 
-    public void addSkillAssessment(Integer accountSkillId,SkillAssessment skillAssessment){
-        AccountSkill accountSkill=accountSkillRepository.findAccountSkillById(accountSkillId);
+    public void addSkillAssessment(Integer accountId, Integer accountSkillId, SkillAssessment skillAssessment) {
+
+        if (accountId == null) {
+            throw new ApiException("Please login first");
+        }
+        AccountSkill accountSkill = accountSkillRepository.findAccountSkillById(accountSkillId);
         if (accountSkill == null) {
             throw new ApiException("Account skill not found");
+        }
+        if (!accountSkill.getAccount().getId().equals(accountId)) {
+            throw new ApiException("You can only take assessments for your own skills");
         }
         skillAssessment.setAccountSkill(accountSkill);
         skillAssessment.setAttemptedAt(LocalDateTime.now());
         skillAssessment.setAssessedLevel(calculateLevel(skillAssessment.getScore()));
         skillAssessmentRepository.save(skillAssessment);
-        //طيب صار السكور اعلى من ٧٠ معناته ناجح على طول يتفعل حساب الاكونت سكل
-        if(skillAssessment.getScore()>=70){
+
+        // طيب صار السكور اعلى من ٧٠ معناته ناجح على طول يتفعل حساب الاكونت سكل
+        if (skillAssessment.getScore() >= 70) {
             accountSkill.setLevel(skillAssessment.getAssessedLevel());
             accountSkill.setVerified(true);
             accountSkillRepository.save(accountSkill);
-
-
         }
     }
 
@@ -61,6 +67,35 @@ public class SkillAssessmentService {
 //ما ينفع احط ابديت هنا مو منطقي الا في حال وجود الادمن
 
 //حتى الحذف الا لو فيه ادمن
+
+
+    //endpoint 11 done
+   public List<SkillAssessment>getAssessmentHistory(Integer accountSkillId){
+    AccountSkill accountSkill=accountSkillRepository.findAccountSkillById(accountSkillId);
+       if (accountSkill == null) {
+           throw new ApiException("Account skill not found");
+       }
+
+       return skillAssessmentRepository.findAllByAccountSkillOrderByAttemptedAtDesc(accountSkill);
+
+
+
+   }
+
+   //endpoint 12 done
+   public SkillAssessment getLatestAssessment(Integer accountSkillId){
+    AccountSkill accountSkill=accountSkillRepository.findAccountSkillById(accountSkillId);
+       if (accountSkill == null) {
+           throw new ApiException("Account skill not found");
+       }
+       SkillAssessment latest=skillAssessmentRepository.findTopByAccountSkillOrderByAttemptedAtDesc(accountSkill);
+        if(latest==null){
+            throw new ApiException("No assessments found for this skill");
+        }
+
+        return latest;
+   }
+
 
 
 
