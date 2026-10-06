@@ -2,6 +2,8 @@ package com.example.capstone_3.Controller;
 
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.ReviewDtoIn;
+import com.example.capstone_3.DtoIn.CreateReviewDtoIn;
+import jakarta.servlet.http.HttpSession;
 import com.example.capstone_3.Service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +22,9 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.get());
     }
 
-    @PostMapping("/add/{exchangeId}/{reviewerId}")
-    public ResponseEntity<?> add(@PathVariable Integer exchangeId, @PathVariable Integer reviewerId, @RequestBody @Valid ReviewDtoIn dto) {
-        reviewService.add(exchangeId, reviewerId, dto);
+    @PostMapping("/add/{exchangeId}")
+    public ResponseEntity<?> add(@PathVariable Integer exchangeId, @RequestBody @Valid CreateReviewDtoIn dto, HttpSession session) {
+        reviewService.add(exchangeId, (Integer) session.getAttribute("accountId"), dto);
         return ResponseEntity.ok(new ApiResponse("Review added successfully"));
     }
 

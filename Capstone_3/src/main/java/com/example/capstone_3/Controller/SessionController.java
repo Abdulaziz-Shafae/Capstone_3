@@ -3,6 +3,7 @@ package com.example.capstone_3.Controller;
 import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.SessionDtoIn;
 import com.example.capstone_3.Service.SessionService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,20 +42,20 @@ public class SessionController {
     }
 
     @PostMapping("/create/{offerId}")
-    public ResponseEntity<?> createSession(@PathVariable Integer offerId, @RequestBody @Valid SessionDtoIn sessionDtoIn) {
-        sessionService.createSession(offerId, sessionDtoIn);
+    public ResponseEntity<?> createSession(@PathVariable Integer offerId, @RequestBody @Valid SessionDtoIn sessionDtoIn, HttpSession session) {
+        sessionService.createSession((Integer) session.getAttribute("accountId"), offerId, sessionDtoIn);
         return ResponseEntity.status(200).body(new ApiResponse("session created"));
     }
 
     @PostMapping("/{sessionId}/join/{exchangeId}")
-    public ResponseEntity<?> joinSession(@PathVariable Integer sessionId, @PathVariable Integer exchangeId) {
-        sessionService.joinSession(sessionId, exchangeId);
+    public ResponseEntity<?> joinSession(@PathVariable Integer sessionId, @PathVariable Integer exchangeId, HttpSession session) {
+        sessionService.joinSession((Integer) session.getAttribute("accountId"), sessionId, exchangeId);
         return ResponseEntity.status(200).body(new ApiResponse("Exchange joined the session"));
     }
 
     @PutMapping("/{sessionId}/attendance/{exchangeId}")
-    public ResponseEntity<?> updateAttendance(@PathVariable Integer sessionId, @PathVariable Integer exchangeId, @RequestBody Map<String, String> body) {
-        sessionService.updateAttendance(sessionId, exchangeId, body.get("status"));
+    public ResponseEntity<?> updateAttendance(@PathVariable Integer sessionId, @PathVariable Integer exchangeId, @RequestBody Map<String, String> body, HttpSession session) {
+        sessionService.updateAttendance((Integer) session.getAttribute("accountId"), sessionId, exchangeId, body.get("status"));
         return ResponseEntity.status(200).body(new ApiResponse("Attendance updated"));
     }
 

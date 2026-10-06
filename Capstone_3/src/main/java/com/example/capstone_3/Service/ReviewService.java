@@ -2,6 +2,8 @@ package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.DtoIn.ReviewDtoIn;
+import com.example.capstone_3.DtoIn.CreateReviewDtoIn;
+import com.example.capstone_3.Model.LearningRequest;
 import com.example.capstone_3.Model.Account;
 import com.example.capstone_3.Model.Exchange;
 import com.example.capstone_3.Model.Review;
@@ -47,16 +49,40 @@ public class ReviewService {
         return reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
     }
 
-    public void add(Integer exchangeId, Integer reviewerId, ReviewDtoIn dto) {
+    public void add(Integer exchangeId, Integer reviewerId, CreateReviewDtoIn dto) {
+        if (reviewerId == null) {
+            throw new ApiException("Please log in first");
+        }
         Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
 
         if (exchange == null) {
             throw new ApiException("No exchange found");
         }
 
+        if (!"COMPLETED".equals(exchange.getStatus())) {
+            throw new ApiException("Only completed exchanges can be reviewed");
+        }
+
+        LearningRequest request = exchange.getLearningRequest();
+        if (request == null || request.getRequesterAccount() == null || request.getProviderAccount() == null) {
+            throw new ApiException("Exchange participants not found");
+        }
+        Integer learnerId = request.getRequesterAccount().getId();
+        Integer providerId = request.getProviderAccount().getId();
+        if (!reviewerId.equals(learnerId) && !reviewerId.equals(providerId)) {
+            throw new ApiException("Only exchange participants can write a review");
+        }
+        Integer otherAccountId = reviewerId.equals(learnerId) ? providerId : learnerId;
+        if (!otherAccountId.equals(dto.getReviewedAccountId())) {
+            throw new ApiException("You can only review the other exchange participant");
+        }
+
         Account reviewer = accountRepository.findAccountById(reviewerId);
         if (reviewer == null) {
             throw new ApiException("No reviewer account found");
+        }
+        if (!"ACTIVE".equals(reviewer.getStatus())) {
+            throw new ApiException("Account is not active");
         }
 
         Account reviewed = accountRepository.findAccountById(dto.getReviewedAccountId());

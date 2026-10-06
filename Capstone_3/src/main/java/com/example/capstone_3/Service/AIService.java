@@ -190,9 +190,16 @@ public class AIService {
     }
 
     public Map<String, Object> extractSkills(Integer accountId, MultipartFile file) throws IOException {
+        if (accountId == null) {
+            throw new ApiException("Please log in first");
+        }
         Account account = accountRepository.findAccountById(accountId);
         if (account == null) {
             throw new ApiException("No account found");
+        }
+
+        if (!"ACTIVE".equals(account.getStatus())) {
+            throw new ApiException("Account is not active");
         }
 
         if (file == null || file.isEmpty()) {

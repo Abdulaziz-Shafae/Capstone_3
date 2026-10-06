@@ -1,6 +1,7 @@
 package com.example.capstone_3.Controller;
 
 import com.example.capstone_3.Service.AIService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +27,9 @@ public class AIController {
         return ResponseEntity.ok(aiService.explainMatch(learnerId, providerId, skillId));
     }
 
-    @PostMapping(value = "/cv/extract-skills/{accountId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public ResponseEntity<?> extractSkills(@PathVariable Integer accountId, @RequestParam("file") MultipartFile file
-    ) throws IOException {
-
-        return ResponseEntity.ok(aiService.extractSkills(accountId, file));
+    @PostMapping(value = "/cv/extract-skills", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> extractSkills(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
+        return ResponseEntity.ok(aiService.extractSkills((Integer) session.getAttribute("accountId"), file));
     }
 
     @GetMapping("/cv/suggest-offers/{accountId}")
