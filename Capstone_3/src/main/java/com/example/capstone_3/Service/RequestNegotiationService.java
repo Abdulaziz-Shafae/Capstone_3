@@ -189,8 +189,8 @@ public class RequestNegotiationService {
         LearningRequest learningRequest = checkRequestAccess(accountId, requestId);
         List<RequestNegotiationDtoOut> history = new ArrayList<>();
 
-        if (learningRequest.getRequestNegotiations() == null) {
-            return history;
+        if (learningRequest.getRequestNegotiations() == null || learningRequest.getRequestNegotiations().isEmpty()) {
+            throw new ApiException("No messages found");
         }
 
         List<RequestNegotiation> negotiations = new ArrayList<>(learningRequest.getRequestNegotiations());
