@@ -456,6 +456,9 @@ public class ExchangeService {
     @Transactional
     public void completeExchange(Integer accountId, Integer exchangeId) {
         Exchange exchange = getExchangeForAction(accountId, exchangeId);
+        if (!accountId.equals(exchange.getLearningRequest().getRequesterAccount().getId())) {
+            throw new ApiException("Only the learner can confirm exchange completion");
+        }
         if (!"ACCEPTED".equals(exchange.getStatus()) && !"IN_PROGRESS".equals(exchange.getStatus())) {
             throw new ApiException("Only accepted or in-progress exchanges can be completed");
         }

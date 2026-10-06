@@ -63,6 +63,29 @@ class ExchangeCompletionTests {
     }
 
     @Test
+    void teacherCannotReleaseReservedTokens() {
+        when(accounts.findAccountById(2)).thenReturn(provider);
+        ApiException exception = assertThrows(ApiException.class, () -> service.completeExchange(2, 3));
+        assertEquals("Only the learner can confirm exchange completion", exception.getMessage());
+        assertEquals("ACCEPTED", exchange.getStatus());
+        assertEquals("MATCHED", exchange.getLearningRequest().getStatus());
+        assertTrue(exchange.getTokensReserved());
+        assertNull(exchange.getCompletedAt());
+        verify(accounts, never()).refundTokens(anyInt(), anyInt());
+        verify(exchanges, never()).save(any());
+        verify(requests, never()).save(any());
+        verifyNoInteractions(transactions);
+    }
+
+    @Test
+    void loggedOutUserCannotConfirmCompletion() {
+        assertThrows(ApiException.class, () -> service.completeExchange(null, 3));
+        verify(exchanges, never()).findExchangeForUpdate(anyInt());
+        verify(accounts, never()).refundTokens(anyInt(), anyInt());
+        verifyNoInteractions(transactions);
+    }
+
+    @Test
     void unreservedExchangeCannotBeCompleted() {
         exchange.setTokensReserved(false);
         assertThrows(ApiException.class, () -> service.completeExchange(1, 3));
