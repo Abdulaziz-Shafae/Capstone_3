@@ -170,9 +170,13 @@ public class TokenTransactionService {
         saveTransaction(account, null, BonusAmount, "BONUS",
                 "Bonus for completing " + (deserved * teachingForBonus) + " teachings");
 
-        notifyByEmail(account, "Bonus tokens added",
-                "Congratulations! You received " + BonusAmount + " bonus tokens for completing " + (deserved * teachingForBonus) + " teachings.\n"
-                        + "Your new balance is " + account.getTokenBalance() + " tokens.");
+        notifyByEmail(account, "You earned bonus tokens!",
+                "Hello,\n\n"
+                        + "Congratulations! You have completed " + (deserved * teachingForBonus) + " teaching sessions.\n\n"
+                        + "Bonus tokens: " + BonusAmount + "\n"
+                        + "New balance: " + account.getTokenBalance() + " tokens\n\n"
+                        + "Keep teaching to earn more rewards!\n\n"
+                        + "Thank you for using Skill Exchange!");
     }
     // #46
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -223,10 +227,13 @@ public class TokenTransactionService {
         saveTransaction(learner, exchange, refundAmount, "REFUND", "Refund for cancelled exchange");
         exchange.setTokensReserved(false);
         exchangeRepository.save(exchange);
-        notifyByEmail(learner, "Tokens refunded",
-                refundAmount + " tokens were refunded to you for the cancelled exchange #" + exchangeId + ".\n"
-                        + "Your new balance is " + (oldBalance + refundAmount) + " tokens.");
-
+        notifyByEmail(learner, "Your tokens have been refunded",
+                "Hello,\n\n"
+                        + "Your tokens have been refunded for the cancelled exchange.\n\n"
+                        + "Exchange: #" + exchangeId + "\n"
+                        + "Tokens refunded: " + refundAmount + "\n"
+                        + "New balance: " + (oldBalance + refundAmount) + " tokens\n\n"
+                        + "Thank you for using Skill Exchange!");
 
     }
 
@@ -246,10 +253,13 @@ public class TokenTransactionService {
         }
         int price = amount * tokenPrice;
         saveTransaction(account, null, amount, "PURCHASE", "Simulated purchase of " + amount + " tokens for " + price + " SAR; no real payment processed");
-        notifyByEmail(account, "Tokens purchased",
-                "You purchased " + amount + " tokens for " + price + " SAR.\n"
-                        + "Your new balance is " + (oldBalance + amount) + " tokens.\n"
-                        + "Note: this purchase is simulated in the current version, no real payment was processed.");
+        notifyByEmail(account, "Your token purchase was successful",
+                "Hello,\n\n"
+                        + "Your token purchase has been completed successfully.\n\n"
+                        + "Tokens purchased: " + amount + "\n"
+                        + "Price: " + price + " SAR\n"
+                        + "New balance: " + (oldBalance + amount) + " tokens\n\n"
+                        + "Thank you for using Skill Exchange!");
         return price;
     }
 
