@@ -19,8 +19,5 @@ public class AgreementDtoIn {
     @NotNull(message = "The exchange ID can't be null")
     private Integer exchangeId;
 
-    private Boolean providerAccepted = false;
-
-    private Boolean receiverAccepted = false;
 }
 

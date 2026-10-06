@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "type IN ('STARTING', 'TEACHING', 'LEARNING', 'BONUS', 'REFUND')")
+@Check(constraints = "type IN ('STARTING', 'TEACHING', 'LEARNING', 'BONUS', 'REFUND', 'PURCHASE', 'REDEMPTION')")
 public class TokenTransaction {
 
     @Id

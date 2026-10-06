@@ -1,6 +1,7 @@
 package com.example.capstone_3.Service;
 
 import com.example.capstone_3.Api.ApiException;
+import com.example.capstone_3.DtoOut.SkillOfferDtoOut;
 import com.example.capstone_3.Model.Account;
 import com.example.capstone_3.Model.AccountSkill;
 import com.example.capstone_3.Model.Skill;
@@ -13,12 +14,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 
 public class SkillOfferService {
+    private final AccountAccessService accountAccessService;
     private final SkillOfferRepository skillOfferRepository;
     private final AccountRepository accountRepository;
     private final SkillRepository skillRepository;
@@ -30,10 +33,7 @@ public class SkillOfferService {
     }
 
     public void addOffer(Integer accountId,Integer skillId,SkillOffer skillOffer){
-        Account account = accountRepository.findAccountById(accountId);
-        if (account == null) {
-            throw new ApiException("Account not found");
-        }
+        Account account = accountAccessService.requireActive(accountId);
         Skill skill = skillRepository.findSkillById(skillId);
         if (skill == null) {
             throw new ApiException("Skill not found");
@@ -46,6 +46,10 @@ public class SkillOfferService {
         if (!accountSkill.getVerified()) {
             throw new ApiException("You must pass the skill assessment before offering it");
         }
+        skillOffer.setId(null);
+        skillOffer.setExchanges(null);
+        skillOffer.setSessions(null);
+        skillOffer.setLearningRequests(null);
         skillOffer.setProviderAccount(account);
         skillOffer.setSkill(skill);
         skillOffer.setStatus("ACTIVE");
@@ -86,9 +90,72 @@ public class SkillOfferService {
     }
 
 
+//endPOINT 27 DONE
+   public List<SkillOfferDtoOut>getOffersBySkill(Integer skillId){
+      Skill skill=skillRepository.findSkillById(skillId);
+      if(skill==null){
+          throw new ApiException("Skill not found");
+      }
+      List<SkillOffer>skillOffers=skillOfferRepository.findAllBySkill(skill);
+      List<SkillOfferDtoOut>result=new ArrayList<>();
+      for(SkillOffer s:skillOffers){
+          SkillOfferDtoOut dto=new SkillOfferDtoOut();
+          dto.setId(s.getId());
+          dto.setCapacity(s.getCapacity());
+          dto.setMode(s.getMode());
+          dto.setStatus(s.getStatus());
+          dto.setDescription(s.getDescription());
+          dto.setProviderAccountId(s.getProviderAccount().getId());
+          dto.setTokenCost(s.getTokenCost());
+          dto.setSkillName(s.getSkill().getName());
+          result.add(dto);
+      }
+      return result;
+    }
 
+   //ENDPOINT 28 done
+   public List<SkillOfferDtoOut>getOffersCreatedByProvider(Integer providerId){
+    Account account=accountRepository.findAccountById(providerId);
+    if(account==null){
+        throw new ApiException("Account not found");
+    }
 
+    List<SkillOffer>skillOffers=skillOfferRepository.findAllByProviderAccount(account);
+    List<SkillOfferDtoOut>result=new ArrayList<>();
+    for(SkillOffer s:skillOffers){
+        SkillOfferDtoOut dto=new SkillOfferDtoOut();
+        dto.setId(s.getId());
+        dto.setSkillName(s.getSkill().getName());
+        dto.setProviderAccountId(s.getProviderAccount().getId());
+        dto.setDescription(s.getDescription());
+        dto.setMode(s.getMode());
+        dto.setTokenCost(s.getTokenCost());
+        dto.setCapacity(s.getCapacity());
+        dto.setStatus(s.getStatus());
+        result.add(dto);
+    }
+    return result;
 
+   }
+
+    //ENDPOINT 29 done
+   public List<SkillOfferDtoOut>getActiveOffers(){
+        List<SkillOffer>skillOffers=skillOfferRepository.findAllByStatus("ACTIVE");
+        List<SkillOfferDtoOut>result=new ArrayList<>();
+        for(SkillOffer s:skillOffers){
+            SkillOfferDtoOut dto=new SkillOfferDtoOut();
+            dto.setId(s.getId());
+            dto.setSkillName(s.getSkill().getName());
+            dto.setProviderAccountId(s.getProviderAccount().getId());
+            dto.setDescription(s.getDescription());
+            dto.setMode(s.getMode());
+            dto.setTokenCost(s.getTokenCost());
+            dto.setCapacity(s.getCapacity());
+            dto.setStatus(s.getStatus());
+            result.add(dto);
+        }
+        return result;
+   }
 
 
 

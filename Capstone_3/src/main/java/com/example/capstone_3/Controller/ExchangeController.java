@@ -72,4 +72,18 @@ public class ExchangeController {
     }
 
 
+
+    @PutMapping("/{exchangeId}/complete")
+    public ResponseEntity<?> completeExchange(
+            @PathVariable Integer exchangeId, HttpSession session) {
+
+        exchangeService.completeExchange((Integer) session.getAttribute("accountId"), exchangeId);
+
+        return ResponseEntity.ok(
+                new ApiResponse("Exchange completed successfully")
+        );
+    }
+
+
+
 }

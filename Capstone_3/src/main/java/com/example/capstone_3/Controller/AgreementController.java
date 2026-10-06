@@ -4,6 +4,7 @@ import com.example.capstone_3.Api.ApiResponse;
 import com.example.capstone_3.DtoIn.AgreementDtoIn;
 import com.example.capstone_3.Service.AgreementService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,20 +40,20 @@ public class AgreementController {
     }
 
     @PutMapping("/{exchangeId}/provider-accept")
-    public ResponseEntity<?> providerAccept(@PathVariable Integer exchangeId) {
-        agreementService.providerAccept(exchangeId);
+    public ResponseEntity<?> providerAccept(@PathVariable Integer exchangeId, HttpSession session) {
+        agreementService.providerAccept((Integer) session.getAttribute("accountId"), exchangeId);
         return ResponseEntity.status(200).body(new ApiResponse("Provider accepted the agreement"));
     }
 
     @PutMapping("/{exchangeId}/receiver-accept")
-    public ResponseEntity<?> receiverAccept(@PathVariable Integer exchangeId) {
-        agreementService.receiverAccept(exchangeId);
+    public ResponseEntity<?> receiverAccept(@PathVariable Integer exchangeId, HttpSession session) {
+        agreementService.receiverAccept((Integer) session.getAttribute("accountId"), exchangeId);
         return ResponseEntity.status(200).body(new ApiResponse("Receiver accepted the agreement"));
     }
 
     @GetMapping("/{exchangeId}/status")
-    public ResponseEntity<?> getAcceptanceStatus(@PathVariable Integer exchangeId) {
-        return ResponseEntity.status(200).body(agreementService.getAcceptanceStatus(exchangeId));
+    public ResponseEntity<?> getAcceptanceStatus(@PathVariable Integer exchangeId, HttpSession session) {
+        return ResponseEntity.status(200).body(agreementService.getAcceptanceStatus((Integer) session.getAttribute("accountId"), exchangeId));
     }
 }
 
