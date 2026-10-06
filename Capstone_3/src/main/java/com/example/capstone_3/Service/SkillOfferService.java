@@ -10,6 +10,7 @@ import com.example.capstone_3.Repository.AccountRepository;
 import com.example.capstone_3.Repository.AccountSkillRepository;
 import com.example.capstone_3.Repository.SkillOfferRepository;
 import com.example.capstone_3.Repository.SkillRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +33,11 @@ public class SkillOfferService {
         return skillOfferRepository.findAll();
     }
 
+    @Transactional
     public void addOffer(Integer accountId,Integer skillId,SkillOffer skillOffer){
         Account account = accountAccessService.requireActive(accountId);
+        //نقفل الحساب عشان لو انرسل نفس الطلب مرتين بنفس اللحظة
+        accountRepository.findAccountForTokenUpdate(accountId);
         Skill skill = skillRepository.findSkillById(skillId);
         if (skill == null) {
             throw new ApiException("Skill not found");
@@ -46,6 +50,12 @@ public class SkillOfferService {
         if (!accountSkill.getVerified()) {
             throw new ApiException("You must pass the skill assessment before offering it");
         }
+        //ممنوع نسمع لنفس الاوفر وهو active
+        if (skillOfferRepository.existsByProviderAccountAndSkillAndModeAndTokenCostAndCapacityAndStatus(
+                account, skill, skillOffer.getMode(), skillOffer.getTokenCost(), skillOffer.getCapacity(), "ACTIVE")) {
+            throw new ApiException("You already have an identical active offer");
+        }
+
         skillOffer.setId(null);
         skillOffer.setExchanges(null);
         skillOffer.setSessions(null);

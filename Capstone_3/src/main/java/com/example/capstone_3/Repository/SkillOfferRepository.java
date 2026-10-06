@@ -27,4 +27,8 @@ public interface SkillOfferRepository extends JpaRepository<SkillOffer,Integer> 
 
  long countByProviderAccount_IdAndStatus(Integer accountId, String status);
 
+ Boolean existsByProviderAccountAndSkillAndModeAndTokenCostAndCapacityAndStatus(
+         Account providerAccount, Skill skill, String mode, Integer tokenCost, Integer capacity, String status);
+
+
 }

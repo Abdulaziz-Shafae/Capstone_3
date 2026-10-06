@@ -81,7 +81,7 @@ public class TokenTransactionController {
     @PostMapping("/purchase/{amount}")
     public ResponseEntity<?> purchaseTokens(@PathVariable Integer amount, HttpSession session) {
         Integer price = tokenTransactionService.purchaseTokens((Integer) session.getAttribute("accountId"), amount);
-        return ResponseEntity.status(200).body(new ApiResponse("Simulated purchase: added " + amount + " tokens for " + price + " SAR. No real payment processed"));
+        return ResponseEntity.status(200).body(new ApiResponse("Purchased " + amount + " tokens for " + price + " SAR successfully"));
     }
 
     // #48 Redeem tokens into money

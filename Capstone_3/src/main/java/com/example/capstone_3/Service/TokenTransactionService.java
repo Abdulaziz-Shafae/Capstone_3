@@ -250,6 +250,9 @@ public class TokenTransactionService {
         if (account.getTokenBalance()<amount) {
             throw new ApiException("Not enough tokens");
         }
+        if (account.getTokenBalance()-amount<3) {
+            throw new ApiException("You must keep at least 3 tokens after redemption");
+        }
         account.setTokenBalance(account.getTokenBalance()-amount);
         accountRepository.save(account);
         int money=amount*tokenPrice;
