@@ -126,7 +126,7 @@ public class AIService {
         result.put("activeOffersCount", offers.size());
         result.put("matchPercentage", aiResult.path("matchPercentage").asInt(0));
         result.put("explanation", aiResult.path("explanation").asText(""));
-        result.put("strengths", aiResult.path("strengths"));
+        result.put("strengths", toStringList(aiResult.path("strengths")));
         result.put("skillGaps", aiResult.path("skillGaps"));
         result.put("aiGenerated", true);
 
@@ -344,6 +344,20 @@ public class AIService {
         result.put("offers", rankedOffers);
         result.put("message", "Offers ranked by AI using the learner's recorded skills.");
         result.put("aiGenerated", true);
+
+        return result;
+    }
+
+    private List<String> toStringList(JsonNode node) {
+        List<String> result = new ArrayList<>();
+
+        if (node != null && node.isArray()) {
+            for (JsonNode item : node) {
+                if (!item.isNull()) {
+                    result.add(item.asText());
+                }
+            }
+        }
 
         return result;
     }
