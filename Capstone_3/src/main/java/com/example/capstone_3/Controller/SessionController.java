@@ -50,7 +50,7 @@ public class SessionController {
     @PostMapping("/{sessionId}/join/{exchangeId}")
     public ResponseEntity<?> joinSession(@PathVariable Integer sessionId, @PathVariable Integer exchangeId, HttpSession session) {
         sessionService.joinSession((Integer) session.getAttribute("accountId"), sessionId, exchangeId);
-        return ResponseEntity.status(200).body(new ApiResponse("Exchange joined the session"));
+        return ResponseEntity.status(200).body(new ApiResponse("You joined the session successfully"));
     }
 
     @PutMapping("/{sessionId}/attendance/{exchangeId}")

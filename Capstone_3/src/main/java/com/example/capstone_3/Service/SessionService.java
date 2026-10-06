@@ -146,7 +146,7 @@ public class SessionService {
         }
 
         if (sessionParticipantRepository.findSessionParticipantBySession_IdAndExchange_Id(sessionId, exchangeId) != null) {
-            throw new ApiException("Exchange already joined this session");
+            throw new ApiException("You have already joined this session");
         }
 
         SessionParticipant participant = new SessionParticipant();
