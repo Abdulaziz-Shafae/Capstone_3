@@ -4,6 +4,7 @@ package com.example.capstone_3.Advice;
 import com.example.capstone_3.Api.ApiException;
 import com.example.capstone_3.Api.ApiResponse;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -54,6 +55,12 @@ public class ControllerAdvice {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<?> handleTypeMismatch(NoResourceFoundException e){
         return ResponseEntity.status(400).body(new ApiResponse( e.getMessage() ));
+    }
+
+
+    @ExceptionHandler(InvalidDataAccessResourceUsageException.class)
+    public ResponseEntity<ApiResponse> handleInvalidDataAccessResourceUsageException(InvalidDataAccessResourceUsageException exception) {
+        return ResponseEntity.status(400).body(new ApiResponse("Database operation failed. Please contact support"));
     }
 
 }
