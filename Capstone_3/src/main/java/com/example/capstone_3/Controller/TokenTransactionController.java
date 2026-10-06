@@ -47,5 +47,47 @@ public class TokenTransactionController {
         tokenTransactionService.delete(id);
         return ResponseEntity.status(200).body(new ApiResponse("token transaction deleted"));
     }
+    // ================= Token endpoints =================
+
+    // #43 Get token balance
+    @GetMapping("/account/{accountId}/balance")
+    public ResponseEntity<?> getBalance(@PathVariable Integer accountId) {
+        Integer balance = tokenTransactionService.getBalance(accountId);
+        return ResponseEntity.status(200).body(new ApiResponse("Balance is " + balance + " tokens"));
+    }
+
+    // #44 Get token transaction history
+    @GetMapping("/account/{accountId}/history")
+    public ResponseEntity<?> getHistory(@PathVariable Integer accountId) {
+        return ResponseEntity.status(200).body(tokenTransactionService.getHistory(accountId));
+    }
+
+    // #45 Give bonus tokens (every 5 completed teachings)
+    @PostMapping("/bonus/{accountId}")
+    public ResponseEntity<?> giveBonus(@PathVariable Integer accountId) {
+        tokenTransactionService.giveBonus(accountId);
+        return ResponseEntity.status(200).body(new ApiResponse("Bonus tokens added"));
+    }
+
+    // #46 Refund tokens for exchange
+    @PostMapping("/refund/{exchangeId}")
+    public ResponseEntity<?> refundExchange(@PathVariable Integer exchangeId) {
+        tokenTransactionService.refundExchange(exchangeId);
+        return ResponseEntity.status(200).body(new ApiResponse("Tokens refunded"));
+    }
+
+    // #47 Purchase tokens using money
+    @PostMapping("/purchase/{accountId}/{amount}")
+    public ResponseEntity<?> purchaseTokens(@PathVariable Integer accountId, @PathVariable Integer amount) {
+        Integer price = tokenTransactionService.purchaseTokens(accountId, amount);
+        return ResponseEntity.status(200).body(new ApiResponse("Purchased " + amount + " tokens for " + price + " SAR"));
+    }
+
+    // #48 Redeem tokens into money
+    @PostMapping("/redeem/{accountId}/{amount}")
+    public ResponseEntity<?> redeemTokens(@PathVariable Integer accountId, @PathVariable Integer amount) {
+        Integer money = tokenTransactionService.redeemTokens(accountId, amount);
+        return ResponseEntity.status(200).body(new ApiResponse("Redeemed " + amount + " tokens for " + money + " SAR"));
+    }
 }
 

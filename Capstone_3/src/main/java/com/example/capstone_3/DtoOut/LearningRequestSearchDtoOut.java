@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LearningRequestDtoOut {
+public class LearningRequestSearchDtoOut {
 
     private Integer id;
     private Integer providerAccountId;
