@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AccountSkillService {
+    private final AccountAccessService accountAccessService;
     private final AccountSkillRepository accountSkillRepository;
     private final AccountRepository accountRepository;
     private final SkillRepository skillRepository;
@@ -30,7 +31,7 @@ public class AccountSkillService {
 
 
     public void addAccountSkill(Integer accountId,Integer skillId){
-        Account account=accountRepository.findAccountById(accountId);
+        Account account=accountAccessService.requireActive(accountId);
         if (account == null) {
             throw new ApiException("Account not found");
         }

@@ -31,13 +31,13 @@ public class SkillAssessmentController {
 
 
     @GetMapping("/history/{accountSkillId}")
-    public ResponseEntity<?> getAssessmentHistory(@PathVariable Integer accountSkillId) {
-        return ResponseEntity.status(200).body(skillAssessmentService.getAssessmentHistory(accountSkillId));
+    public ResponseEntity<?> getAssessmentHistory(@PathVariable Integer accountSkillId, HttpSession session) {
+        return ResponseEntity.status(200).body(skillAssessmentService.getAssessmentHistory((Integer) session.getAttribute("accountId"), accountSkillId));
     }
 
     @GetMapping("/latest/{accountSkillId}")
-    public ResponseEntity<?> getLatestAssessment(@PathVariable Integer accountSkillId) {
-        return ResponseEntity.status(200).body(skillAssessmentService.getLatestAssessment(accountSkillId));
+    public ResponseEntity<?> getLatestAssessment(@PathVariable Integer accountSkillId, HttpSession session) {
+        return ResponseEntity.status(200).body(skillAssessmentService.getLatestAssessment((Integer) session.getAttribute("accountId"), accountSkillId));
     }
 
     // Update and Delete are not allowed: assessment results are a permanent record (admin only if needed)

@@ -56,13 +56,13 @@ public class LearningRequestController {
     }
 
     @GetMapping("/requester/{accountId}")
-    public ResponseEntity<?> getRequestsByRequester(@PathVariable Integer accountId) {
-        return ResponseEntity.ok(learningRequestService.getRequestsByRequester(accountId));
+    public ResponseEntity<?> getRequestsByRequester(@PathVariable Integer accountId, HttpSession session) {
+        return ResponseEntity.ok(learningRequestService.getRequestsByRequester((Integer) session.getAttribute("accountId"), accountId));
     }
 
     @GetMapping("/provider/{accountId}")
-    public ResponseEntity<?> getRequestsByProvider(@PathVariable Integer accountId) {
-        return ResponseEntity.ok(learningRequestService.getRequestsByProvider(accountId));
+    public ResponseEntity<?> getRequestsByProvider(@PathVariable Integer accountId, HttpSession session) {
+        return ResponseEntity.ok(learningRequestService.getRequestsByProvider((Integer) session.getAttribute("accountId"), accountId));
     }
 
     @GetMapping("/urgent")
@@ -71,8 +71,8 @@ public class LearningRequestController {
     }
 
     @PutMapping("/{requestId}/cancel")
-    public ResponseEntity<?> cancelLearningRequest(@PathVariable Integer requestId) {
-        learningRequestService.cancelLearningRequest(requestId);
+    public ResponseEntity<?> cancelLearningRequest(@PathVariable Integer requestId, HttpSession session) {
+        learningRequestService.cancelLearningRequest((Integer) session.getAttribute("accountId"), requestId);
         return ResponseEntity.ok(new ApiResponse("Learning request cancelled"));
     }
 

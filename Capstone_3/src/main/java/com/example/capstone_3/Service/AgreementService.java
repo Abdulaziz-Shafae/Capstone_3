@@ -8,6 +8,7 @@ import com.example.capstone_3.Repository.AgreementRepository;
 import com.example.capstone_3.Repository.ExchangeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AgreementService {
+    private final AccountAccessService accountAccessService;
 
     private final AgreementRepository agreementRepository;
     private final ExchangeRepository exchangeRepository;
@@ -69,19 +71,31 @@ public class AgreementService {
         agreementRepository.save(oldAgreement);
     }
 
-    public void providerAccept(Integer exchangeId) {
+    @Transactional
+    public void providerAccept(Integer accountId, Integer exchangeId) {
+        Exchange exchange = requireParticipant(accountId, exchangeId);
+        if (!accountId.equals(exchange.getLearningRequest().getProviderAccount().getId())) {
+            throw new ApiException("Only the provider can accept the provider agreement");
+        }
         Agreement agreement = findAgreementByExchangeId(exchangeId);
         agreement.setProviderAccepted(true);
         agreementRepository.save(agreement);
     }
 
-    public void receiverAccept(Integer exchangeId) {
+    @Transactional
+    public void receiverAccept(Integer accountId, Integer exchangeId) {
+        Exchange exchange = requireParticipant(accountId, exchangeId);
+        if (!accountId.equals(exchange.getLearningRequest().getRequesterAccount().getId())) {
+            throw new ApiException("Only the learner can accept the receiver agreement");
+        }
         Agreement agreement = findAgreementByExchangeId(exchangeId);
         agreement.setReceiverAccepted(true);
         agreementRepository.save(agreement);
     }
 
-    public Map<String, Object> getAcceptanceStatus(Integer exchangeId) {
+    @Transactional
+    public Map<String, Object> getAcceptanceStatus(Integer accountId, Integer exchangeId) {
+        requireParticipant(accountId, exchangeId);
         Agreement agreement = findAgreementByExchangeId(exchangeId);
 
         Map<String, Object> status = new HashMap<>();
@@ -91,6 +105,21 @@ public class AgreementService {
         status.put("fullyAccepted", Boolean.TRUE.equals(agreement.getProviderAccepted()) && Boolean.TRUE.equals(agreement.getReceiverAccepted()));
 
         return status;
+    }
+
+    private Exchange requireParticipant(Integer accountId, Integer exchangeId) {
+        accountAccessService.requireActive(accountId);
+        Exchange exchange = exchangeRepository.findExchangeForUpdate(exchangeId);
+        if (exchange == null) {
+            throw new ApiException("No exchange found");
+        }
+        if (exchange.getLearningRequest() == null || exchange.getLearningRequest().getRequesterAccount() == null || exchange.getLearningRequest().getProviderAccount() == null) {
+            throw new ApiException("Exchange participants not found");
+        }
+        if (!accountId.equals(exchange.getLearningRequest().getRequesterAccount().getId()) && !accountId.equals(exchange.getLearningRequest().getProviderAccount().getId())) {
+            throw new ApiException("Only exchange participants can access this agreement");
+        }
+        return exchange;
     }
 
     private Agreement findAgreementByExchangeId(Integer exchangeId) {

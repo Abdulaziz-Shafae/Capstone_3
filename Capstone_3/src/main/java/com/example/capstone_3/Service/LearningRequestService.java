@@ -18,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class LearningRequestService {
+    private final AccountAccessService accountAccessService;
     private final LearningRequestRepository learningRequestRepository;
     private final AccountRepository accountRepository;
     private final SkillRepository skillRepository;
@@ -243,7 +244,8 @@ public class LearningRequestService {
         return learningRequestRepository.findBySkill_IdAndStatus(skillId, "OPEN");
     }
 
-    public List<LearningRequest> getRequestsByRequester(Integer accountId) {
+    public List<LearningRequest> getRequestsByRequester(Integer loggedInAccountId, Integer accountId) {
+        requireOwnAccount(loggedInAccountId, accountId);
         if (accountRepository.findAccountById(accountId) == null) {
             throw new ApiException("Account not found");
         }
@@ -251,7 +253,8 @@ public class LearningRequestService {
         return learningRequestRepository.findByRequesterAccount_Id(accountId);
     }
 
-    public List<LearningRequest> getRequestsByProvider(Integer accountId) {
+    public List<LearningRequest> getRequestsByProvider(Integer loggedInAccountId, Integer accountId) {
+        requireOwnAccount(loggedInAccountId, accountId);
         if (accountRepository.findAccountById(accountId) == null) {
             throw new ApiException("Account not found");
         }
@@ -263,11 +266,16 @@ public class LearningRequestService {
         return learningRequestRepository.findByUrgentTrueAndStatus("OPEN");
     }
 
-    public void cancelLearningRequest(Integer requestId) {
+    public void cancelLearningRequest(Integer accountId, Integer requestId) {
+        accountAccessService.requireActive(accountId);
         LearningRequest request = learningRequestRepository.findLearningRequestById(requestId);
 
         if (request == null) {
             throw new ApiException("Learning request not found");
+        }
+
+        if (request.getRequesterAccount() == null || !accountId.equals(request.getRequesterAccount().getId())) {
+            throw new ApiException("Only the requester can cancel this learning request");
         }
 
         if (!"OPEN".equals(request.getStatus())) {
@@ -276,6 +284,13 @@ public class LearningRequestService {
 
         request.setStatus("CANCELLED");
         learningRequestRepository.save(request);
+    }
+
+    private void requireOwnAccount(Integer loggedInAccountId, Integer accountId) {
+        accountAccessService.requireActive(loggedInAccountId);
+        if (!loggedInAccountId.equals(accountId)) {
+            throw new ApiException("You can only view your own learning requests");
+        }
     }
 
 

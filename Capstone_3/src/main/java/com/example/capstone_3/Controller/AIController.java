@@ -17,14 +17,14 @@ public class AIController {
 
     private final AIService aiService;
 
-    @GetMapping("/match/{learnerId}/{skillId}")
-    public ResponseEntity<?> match(@PathVariable Integer learnerId, @PathVariable Integer skillId) {
-        return ResponseEntity.ok(aiService.calculateMatch(learnerId, skillId));
+    @GetMapping("/match/{skillId}")
+    public ResponseEntity<?> match(@PathVariable Integer skillId, HttpSession session) {
+        return ResponseEntity.ok(aiService.calculateMatch((Integer) session.getAttribute("accountId"), skillId));
     }
 
-    @GetMapping("/match/{learnerId}/{providerId}/{skillId}/explanation")
-    public ResponseEntity<?> matchExplanation(@PathVariable Integer learnerId, @PathVariable Integer providerId, @PathVariable Integer skillId) {
-        return ResponseEntity.ok(aiService.explainMatch(learnerId, providerId, skillId));
+    @GetMapping("/match/{providerId}/{skillId}/explanation")
+    public ResponseEntity<?> matchExplanation(@PathVariable Integer providerId, @PathVariable Integer skillId, HttpSession session) {
+        return ResponseEntity.ok(aiService.explainMatch((Integer) session.getAttribute("accountId"), providerId, skillId));
     }
 
     @PostMapping(value = "/cv/extract-skills", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -32,8 +32,8 @@ public class AIController {
         return ResponseEntity.ok(aiService.extractSkills((Integer) session.getAttribute("accountId"), file));
     }
 
-    @GetMapping("/cv/suggest-offers/{accountId}")
-    public ResponseEntity<?> suggestOffers(@PathVariable Integer accountId) {
-        return ResponseEntity.ok(aiService.suggestOffers(accountId));
+    @GetMapping("/cv/suggest-offers")
+    public ResponseEntity<?> suggestOffers(HttpSession session) {
+        return ResponseEntity.ok(aiService.suggestOffers((Integer) session.getAttribute("accountId")));
     }
 }

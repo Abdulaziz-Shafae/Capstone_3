@@ -21,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 
 public class SkillOfferService {
+    private final AccountAccessService accountAccessService;
     private final SkillOfferRepository skillOfferRepository;
     private final AccountRepository accountRepository;
     private final SkillRepository skillRepository;
@@ -32,7 +33,7 @@ public class SkillOfferService {
     }
 
     public void addOffer(Integer accountId,Integer skillId,SkillOffer skillOffer){
-        Account account = accountRepository.findAccountById(accountId);
+        Account account = accountAccessService.requireActive(accountId);
         if (account == null) {
             throw new ApiException("Account not found");
         }
@@ -48,6 +49,10 @@ public class SkillOfferService {
         if (!accountSkill.getVerified()) {
             throw new ApiException("You must pass the skill assessment before offering it");
         }
+        skillOffer.setId(null);
+        skillOffer.setExchanges(null);
+        skillOffer.setSessions(null);
+        skillOffer.setLearningRequests(null);
         skillOffer.setProviderAccount(account);
         skillOffer.setSkill(skill);
         skillOffer.setStatus("ACTIVE");

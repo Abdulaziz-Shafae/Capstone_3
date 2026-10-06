@@ -65,7 +65,7 @@ public class SessionController {
     }
 
     @GetMapping("/exchange/{exchangeId}")
-    public ResponseEntity<?> getSessionsByExchange(@PathVariable Integer exchangeId) {
-        return ResponseEntity.status(200).body(sessionService.getSessionsByExchange(exchangeId));
+    public ResponseEntity<?> getSessionsByExchange(@PathVariable Integer exchangeId, HttpSession session) {
+        return ResponseEntity.status(200).body(sessionService.getSessionsByExchange((Integer) session.getAttribute("accountId"), exchangeId));
     }
 }

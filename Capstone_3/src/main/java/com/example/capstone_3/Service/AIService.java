@@ -32,6 +32,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AIService {
+    private final AccountAccessService accountAccessService;
 
     private final AccountRepository accountRepository;
     private final AccountSkillRepository accountSkillRepository;
@@ -77,7 +78,7 @@ public class AIService {
     }
 
     public Map<String, Object> calculateMatch(Integer learnerId, Integer skillId) {
-        Account learner = accountRepository.findAccountById(learnerId);
+        Account learner = accountAccessService.requireActive(learnerId);
         if (learner == null) {
             throw new ApiException("No learner account found");
         }
@@ -136,7 +137,7 @@ public class AIService {
     }
 
     public Map<String, Object> explainMatch(Integer learnerId, Integer providerId, Integer skillId) {
-        Account learner = accountRepository.findAccountById(learnerId);
+        Account learner = accountAccessService.requireActive(learnerId);
         if (learner == null) {
             throw new ApiException("No learner account found");
         }
@@ -290,6 +291,7 @@ public class AIService {
     }
 
     public Map<String, Object> suggestOffers(Integer accountId) {
+        accountAccessService.requireActive(accountId);
         Account account = accountRepository.findAccountById(accountId);
         if (account == null) {
             throw new ApiException("No account found");

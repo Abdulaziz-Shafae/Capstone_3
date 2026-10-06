@@ -190,13 +190,20 @@ public class SessionService {
         return sessionRepository.findBySkillOffer_Id(offerId);
     }
 
-    public List<Session> getSessionsByExchange(Integer exchangeId) {
+    public List<Session> getSessionsByExchange(Integer accountId, Integer exchangeId) {
+        requireActiveAccount(accountId);
         Exchange exchange = exchangeRepository.findExchangeById(exchangeId);
 
         if (exchange == null) {
             throw new ApiException("No exchange found");
         }
 
+        if (exchange.getLearningRequest() == null || exchange.getLearningRequest().getRequesterAccount() == null || exchange.getLearningRequest().getProviderAccount() == null) {
+            throw new ApiException("Exchange participants not found");
+        }
+        if (!accountId.equals(exchange.getLearningRequest().getRequesterAccount().getId()) && !accountId.equals(exchange.getLearningRequest().getProviderAccount().getId())) {
+            throw new ApiException("Only exchange participants can view these sessions");
+        }
         return sessionRepository.findDistinctBySessionParticipants_Exchange_Id(exchangeId);
     }
 
