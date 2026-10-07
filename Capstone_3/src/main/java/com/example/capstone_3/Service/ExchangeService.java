@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExchangeService {
     private final AccountAccessService accountAccessService;
-    private final BrevoEmailService brevoEmailService;
 
     private final ExchangeRepository exchangeRepository;
     private final AccountRepository accountRepository;
