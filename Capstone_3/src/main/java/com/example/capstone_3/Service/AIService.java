@@ -55,8 +55,9 @@ public class AIService {
     private final ExchangeRepository exchangeRepository;
 
 
-    @Value("${apify.api-token:}")
+    @Value("${}")
     private String apifyApiToken;
+
 
     private final HttpClient apifyHttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
 
@@ -153,7 +154,7 @@ public class AIService {
         result.put("matchPercentage", aiResult.path("matchPercentage").asInt(0));
         result.put("explanation", aiResult.path("explanation").asText(""));
         result.put("strengths", toStringList(aiResult.path("strengths")));
-        result.put("skillGaps", aiResult.path("skillGaps"));
+        result.put("skillGaps", toStringList(aiResult.path("skillGaps")));
         result.put("aiGenerated", true);
 
         return result;
@@ -204,7 +205,7 @@ public class AIService {
         result.put("matched", !matchingOffers.isEmpty() && aiResult.path("matched").asBoolean(false));
         result.put("matchPercentage", aiResult.path("matchPercentage").asInt(0));
         result.put("explanation", aiResult.path("explanation").asText(""));
-        result.put("reasons", aiResult.path("reasons"));
+        result.put("reasons", toStringList(aiResult.path("reasons")));
         result.put("aiGenerated", true);
 
         return result;

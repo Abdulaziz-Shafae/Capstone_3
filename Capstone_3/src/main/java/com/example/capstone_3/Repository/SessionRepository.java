@@ -7,6 +7,8 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -24,5 +26,7 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     Session findSessionForUpdate(@Param("id") Integer id);
 
     List<Session> findByStatusAndReminderSentFalse(String status);
+
+    boolean existsBySkillOffer_IdAndScheduledAtAndStatus(Integer offerId, LocalDateTime scheduledAt, String status);
 
 }
