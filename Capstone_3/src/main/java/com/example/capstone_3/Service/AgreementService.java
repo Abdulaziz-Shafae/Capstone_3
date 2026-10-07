@@ -39,8 +39,8 @@ public class AgreementService {
 
         Agreement agreement = new Agreement();
         agreement.setContent(agreementDtoIn.getContent());
-        agreement.setProviderAccepted(agreementDtoIn.getProviderAccepted() != null ? agreementDtoIn.getProviderAccepted() : false);
-        agreement.setReceiverAccepted(agreementDtoIn.getReceiverAccepted() != null ? agreementDtoIn.getReceiverAccepted() : false);
+        agreement.setProviderAccepted(false);
+        agreement.setReceiverAccepted(false);
         agreement.setExchange(exchange);
 
         agreementRepository.save(agreement);
@@ -63,9 +63,12 @@ public class AgreementService {
             throw new ApiException("An agreement already exists for this exchange");
         }
 
+        if (!java.util.Objects.equals(oldAgreement.getContent(), agreementDtoIn.getContent()) || !oldAgreement.getExchange().getId().equals(exchange.getId())) {
+            oldAgreement.setProviderAccepted(false);
+            oldAgreement.setReceiverAccepted(false);
+        }
+
         oldAgreement.setContent(agreementDtoIn.getContent());
-        oldAgreement.setProviderAccepted(agreementDtoIn.getProviderAccepted() != null ? agreementDtoIn.getProviderAccepted() : oldAgreement.getProviderAccepted());
-        oldAgreement.setReceiverAccepted(agreementDtoIn.getReceiverAccepted() != null ? agreementDtoIn.getReceiverAccepted() : oldAgreement.getReceiverAccepted());
         oldAgreement.setExchange(exchange);
 
         agreementRepository.save(oldAgreement);

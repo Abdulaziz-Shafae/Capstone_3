@@ -12,7 +12,8 @@ import com.example.capstone_3.Repository.SessionRepository;
 import com.example.capstone_3.Repository.SkillOfferRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import com.example.capstone_3.DtoOut.ZoomMeetingDtoOut;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -24,6 +25,7 @@ public class SessionService {
     private final SkillOfferRepository skillOfferRepository;
     private final ExchangeRepository exchangeRepository;
     private final SessionParticipantRepository sessionParticipantRepository;
+    private final ZoomService zoomService;
 
     public List<Session> get() {
         return sessionRepository.findAll();
@@ -56,6 +58,10 @@ public class SessionService {
             throw new ApiException("No session found");
         }
 
+        if (oldSession.getZoomMeetingId() != null) {
+            throw new ApiException("Sessions linked to Zoom cannot be updated through this endpoint yet");
+        }
+
         SkillOffer skillOffer = skillOfferRepository.findSkillOfferById(sessionDtoIn.getSkillOfferId());
 
         if (skillOffer == null) {
@@ -79,6 +85,10 @@ public class SessionService {
 
         if (oldSession == null) {
             throw new ApiException("No session found");
+        }
+
+        if (oldSession.getZoomMeetingId() != null) {
+            throw new ApiException("Sessions linked to Zoom cannot be deleted through this endpoint yet");
         }
 
         sessionRepository.delete(oldSession);
@@ -211,5 +221,52 @@ public class SessionService {
         if (skillOffer == null || skillOffer.getProviderAccount() == null || !accountId.equals(skillOffer.getProviderAccount().getId())) {
             throw new ApiException("Only the offer provider can manage this session");
         }
+    }
+
+    @Transactional
+    public ZoomMeetingDtoOut createZoomMeeting(Integer accountId, Integer sessionId) {
+
+        accountAccessService.requireActive(accountId);
+
+        Session session = sessionRepository.findSessionForUpdate(sessionId);
+
+        if (session == null) {
+            throw new ApiException("No session found");
+        }
+
+        requireProvider(accountId, session.getSkillOffer());
+
+        if (!"ONLINE".equals(session.getMode())) {
+            throw new ApiException("Zoom meetings are only available for online sessions");
+        }
+
+        if (!"SCHEDULED".equals(session.getStatus())) {
+            throw new ApiException("The session must be scheduled");
+        }
+
+        if (session.getZoomMeetingId() != null) {
+            if (session.getMeetingLink() == null || session.getMeetingLink().isBlank()) {
+                throw new ApiException("The saved Zoom meeting link is missing");
+            }
+
+            ZoomMeetingDtoOut result = new ZoomMeetingDtoOut();
+            result.setSessionId(session.getId());
+            result.setMeetingId(session.getZoomMeetingId());
+            result.setTitle(session.getTitle());
+            result.setScheduledAt(session.getScheduledAt());
+            result.setDurationMinutes(session.getDurationMinutes());
+            result.setTimezone("Asia/Riyadh");
+            result.setMeetingLink(session.getMeetingLink());
+
+            return result;
+        }
+
+        ZoomMeetingDtoOut result = zoomService.createMeeting(session);
+
+        session.setZoomMeetingId(result.getMeetingId());
+        session.setMeetingLink(result.getMeetingLink());
+        sessionRepository.saveAndFlush(session);
+
+        return result;
     }
 }
