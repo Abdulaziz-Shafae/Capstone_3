@@ -28,8 +28,8 @@ public class RequestNegotiationService {
 
     private final RequestNegotiationRepository requestNegotiationRepository;
     private final LearningRequestRepository learningRequestRepository;
-    private final AccountRepository accountRepository;
     private final AccountNameHelper accountNameHelper;
+    private final BrevoEmailService brevoEmailService;
 
     public List<RequestNegotiation> get() {
         return requestNegotiationRepository.findAll();
@@ -115,6 +115,30 @@ public class RequestNegotiationService {
         negotiation.setLearningRequest(learningRequest);
 
         requestNegotiationRepository.save(negotiation);
+
+        Account recipient = isRequester ? provider : requester;
+
+        String subject = proposedDate == null
+                ? "New message on your learning request"
+                : "New proposed date for your learning request";
+
+        String text = "Hello " + accountNameHelper.getAccountName(recipient)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(account)
+                + " sent a response to learning request #" + learningRequest.getId()
+                + ".\n\nMessage: " + dtoIn.getMessage();
+
+        if (proposedDate != null) {
+            text += "\nProposed date: " + proposedDate
+                    + "\nTotal cost: "
+                    + (learningRequest.getBaseTokens() + urgentTokens + weekendTokens)
+                    + " tokens";
+        }
+
+        brevoEmailService.sendEmail(recipient.getEmail(), subject, text);
+
+        //whatsapp
+
     }
 
     private LocalDateTime getOriginalTeacherDate(LearningRequest learningRequest) {
@@ -402,6 +426,21 @@ public class RequestNegotiationService {
         learningRequest.setAcceptedNegotiation(negotiation);
 
         learningRequestRepository.save(learningRequest);
+
+        Account recipient = negotiation.getSenderAccount();
+
+        String subject = "Your proposed date has been accepted";
+
+        String text = "Hello " + accountNameHelper.getAccountName(recipient)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(account)
+                + " accepted your proposal for learning request #" + learningRequest.getId()
+                + ".\n\nAgreed date: " + negotiation.getProposedDate()
+                + "\nAgreed cost: " + totalTokens + " tokens";
+
+        brevoEmailService.sendEmail(recipient.getEmail(), subject, text);
+
+        // whatsapp
     }
 
 }

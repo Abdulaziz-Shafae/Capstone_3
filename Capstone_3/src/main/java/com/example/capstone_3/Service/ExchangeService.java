@@ -25,6 +25,8 @@ public class ExchangeService {
     private final SkillOfferRepository skillOfferRepository;
     private final TokenTransactionRepository tokenTransactionRepository;
     private final AccountNameHelper accountNameHelper;
+    private final BrevoEmailService brevoEmailService;
+    private final WhatsAppService whatsAppService;
 
     public List<Exchange> get(){
         return exchangeRepository.findAll();
@@ -184,6 +186,22 @@ public class ExchangeService {
         learningRequest.setStatus("MATCHED");
 
         learningRequestRepository.save(learningRequest);
+
+        String subject = "New exchange awaiting your acceptance";
+
+        String text = "Hello " + accountNameHelper.getAccountName(provider)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(requester)
+                + " created a new exchange awaiting your acceptance."
+                + "\n\nExchange ID: " + exchange.getId()
+                + "\nSkill: " + learningRequest.getSkill().getName()
+                + "\nAgreed date: " + learningRequest.getNeededBy()
+                + "\nAgreed cost: " + exchange.getTokenAmount() + " tokens";
+
+        brevoEmailService.sendEmail(provider.getEmail(), subject, text);
+
+        //whatsapp
+
     }
 
     @Transactional
@@ -313,6 +331,21 @@ public class ExchangeService {
         exchange.setStatus("ACCEPTED");
 
         exchangeRepository.save(exchange);
+
+        String subject = "Your exchange has been accepted";
+
+        String text = "Hello " + accountNameHelper.getAccountName(requester)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(provider)
+                + " accepted your exchange."
+                + "\n\nExchange ID: " + exchange.getId()
+                + "\nSkill: " + request.getSkill().getName()
+                + "\nAgreed date: " + request.getNeededBy()
+                + "\nReserved tokens: " + amount
+                + "\n\nYour tokens have been reserved for this exchange.";
+
+        brevoEmailService.sendEmail(requester.getEmail(), subject, text);
+
     }
 
     @Transactional
@@ -323,6 +356,9 @@ public class ExchangeService {
         if (!"PENDING".equals(exchange.getStatus()) && !"ACCEPTED".equals(exchange.getStatus())) {
             throw new ApiException("Only pending or accepted exchanges can be cancelled");
         }
+
+        int refundedTokens = Boolean.TRUE.equals(exchange.getTokensReserved()) ? exchange.getTokenAmount() : 0;
+
 
         if (Boolean.TRUE.equals(exchange.getTokensReserved())) {
 
@@ -341,6 +377,27 @@ public class ExchangeService {
             saveTokenTransaction(requester, exchange, amount, "REFUND", "Refund for cancelled exchange");
 
             exchange.setTokensReserved(false);
+            try {
+                String phone;
+                String name;
+                if (requester.getIndividualProfile() != null) {
+                    phone = requester.getIndividualProfile().getPhone();
+                    name = requester.getIndividualProfile().getName();
+                } else {
+                    phone = requester.getCompanyProfile().getPhone();
+                    name = requester.getCompanyProfile().getName();
+                }
+
+                whatsAppService.sendMessage(
+                        phone,
+                        "Hello " + name + " 👋\n\n" +
+                                "Your exchange #" + exchange.getId() + " has been cancelled.\n" +
+                                "✅ " + amount + " tokens have been refunded to your account.\n\n" +
+                                "Your current balance: " + (requester.getTokenBalance() + amount) + " tokens 💰"
+                );
+            } catch (Exception e) {
+                System.out.println("WhatsApp message failed: " + e.getMessage());
+            }
         }
 
         exchange.setStatus("CANCELLED");
@@ -349,6 +406,39 @@ public class ExchangeService {
         LearningRequest request = exchange.getLearningRequest();
         request.setStatus("CANCELLED");
         learningRequestRepository.save(request);
+
+        Account learner = request.getRequesterAccount();
+        Account teacher = request.getProviderAccount();
+
+        Account cancelledBy = accountId.equals(learner.getId()) ? learner : teacher;
+        Account recipient = accountId.equals(learner.getId()) ? teacher : learner;
+
+        String subject = "Your exchange has been cancelled";
+
+        String text = "Hello " + accountNameHelper.getAccountName(recipient)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(cancelledBy)
+                + " cancelled exchange #" + exchange.getId() + ".";
+
+        if (recipient.getId().equals(learner.getId())) {
+            text += refundedTokens > 0
+                    ? "\n\nRefunded tokens: " + refundedTokens
+                    : "\n\nNo tokens were reserved, so no refund was needed.";
+        }
+
+        brevoEmailService.sendEmail(recipient.getEmail(), subject, text);
+
+        if (cancelledBy.getId().equals(learner.getId())) {
+            String refundText = "Hello " + accountNameHelper.getAccountName(learner)
+                    + ",\n\nYour exchange #" + exchange.getId() + " has been cancelled.";
+
+            refundText += refundedTokens > 0
+                    ? "\n\nRefunded tokens: " + refundedTokens
+                    : "\n\nNo tokens were reserved, so no refund was needed.";
+
+            brevoEmailService.sendEmail(learner.getEmail(), "Exchange cancellation confirmation", refundText);
+        }
+
     }
 
     private Exchange getExchangeForAction(Integer accountId, Integer exchangeId) {

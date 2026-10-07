@@ -25,6 +25,8 @@ public class LearningRequestService {
     private final SkillOfferRepository skillOfferRepository;
     private final AccountSkillRepository accountSkillRepository;
     private final AccountNameHelper accountNameHelper;
+    private final BrevoEmailService brevoEmailService;
+
 
     public List<LearningRequest> getAllLearningRequests() {
         return learningRequestRepository.findAll();
@@ -105,6 +107,23 @@ public class LearningRequestService {
         learningRequest.setCreatedAt(LocalDateTime.now());
 
         learningRequestRepository.save(learningRequest);
+
+        String subject = "New learning request";
+
+        String text = "Hello " + accountNameHelper.getAccountName(providerAccount)
+                + ",\n\n"
+                + accountNameHelper.getAccountName(account)
+                + " sent you a new learning request."
+                + "\n\nRequest ID: " + learningRequest.getId()
+                + "\nSkill: " + skill.getName()
+                + "\nDescription: " + learningRequest.getDescription()
+                + "\nMode: " + learningRequest.getMode()
+                + "\nBase cost: " + learningRequest.getBaseTokens() + " tokens";
+
+        brevoEmailService.sendEmail(providerAccount.getEmail(), subject, text);
+
+        //whatsapp
+
     }
 
     public void updateLearningRequest(Integer id, LearningRequest learningRequest){
