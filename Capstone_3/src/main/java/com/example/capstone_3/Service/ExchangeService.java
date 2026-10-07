@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExchangeService {
     private final AccountAccessService accountAccessService;
+    private final BrevoEmailService brevoEmailService;
 
     private final ExchangeRepository exchangeRepository;
     private final AccountRepository accountRepository;
@@ -571,6 +572,23 @@ public class ExchangeService {
         exchangeRepository.save(exchange);
         request.setStatus("CLOSED");
         learningRequestRepository.save(request);
+
+        String learnerEmail = request.getRequesterAccount().getEmail();
+        String providerEmail = request.getProviderAccount().getEmail();
+
+        brevoEmailService.sendSessionEmail(
+                learnerEmail,
+                "Exchange Completed - Write a Review",
+                "Your exchange has been completed successfully."
+                        + "\nPlease write a review for this exchange."
+        );
+
+        brevoEmailService.sendSessionEmail(
+                providerEmail,
+                "Exchange Completed - Write a Review",
+                "Your exchange has been completed successfully."
+                        + "\nPlease write a review for this exchange."
+        );
     }
 
 }

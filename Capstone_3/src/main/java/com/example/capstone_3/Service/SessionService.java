@@ -20,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SessionService {
     private final AccountAccessService accountAccessService;
+    private final BrevoEmailService brevoEmailService;
 
     private final SessionRepository sessionRepository;
     private final SkillOfferRepository skillOfferRepository;
@@ -96,6 +97,7 @@ public class SessionService {
 
     public void createSession(Integer accountId, Integer offerId, SessionDtoIn sessionDtoIn) {
         accountAccessService.requireActive(accountId);
+
         SkillOffer skillOffer = skillOfferRepository.findSkillOfferById(offerId);
 
         if (skillOffer == null) {
@@ -119,6 +121,24 @@ public class SessionService {
         session.setSkillOffer(skillOffer);
 
         sessionRepository.save(session);
+
+        List<Exchange> exchanges = exchangeRepository.findBySkillOffer_IdAndStatusIn(offerId, List.of("ACCEPTED", "IN_PROGRESS"));
+
+        for (Exchange exchange : exchanges) {
+            if (exchange.getLearningRequest() != null && exchange.getLearningRequest().getRequesterAccount() != null) {
+                String learnerEmail = exchange.getLearningRequest().getRequesterAccount().getEmail();
+
+                brevoEmailService.sendSessionEmail(
+                        learnerEmail,
+                        "New Session Created",
+                        "A new session has been created."
+                                + "\nSession: " + session.getTitle()
+                                + "\nDate: " + session.getScheduledAt()
+                                + "\nDuration: " + session.getDurationMinutes() + " minutes"
+                                + "\nMeeting Link: " + session.getMeetingLink()
+                );
+            }
+        }
     }
 
     public void joinSession(Integer accountId, Integer sessionId, Integer exchangeId) {
@@ -165,6 +185,21 @@ public class SessionService {
         participant.setStatus("JOINED");
 
         sessionParticipantRepository.save(participant);
+        String learnerEmail =
+                exchange.getLearningRequest()
+                        .getRequesterAccount()
+                        .getEmail();
+
+        brevoEmailService.sendSessionEmail(
+                learnerEmail,
+                "Session Joined",
+                "You have successfully joined the session: "
+                        + session.getTitle()
+                        + "\nDate: "
+                        + session.getScheduledAt()
+                        + "\nMeeting Link: "
+                        + session.getMeetingLink()
+        );
     }
 
     public void updateAttendance(Integer accountId, Integer sessionId, Integer exchangeId, String status) {

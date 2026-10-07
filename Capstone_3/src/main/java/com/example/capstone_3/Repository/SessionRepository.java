@@ -18,8 +18,11 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
 
     List<Session> findDistinctBySessionParticipants_Exchange_Id(Integer exchangeId);
 
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Session s where s.id = :id")
     Session findSessionForUpdate(@Param("id") Integer id);
+
+    List<Session> findByStatusAndReminderSentFalse(String status);
 
 }
