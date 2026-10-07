@@ -25,6 +25,7 @@ public class ExchangeService {
     private final SkillOfferRepository skillOfferRepository;
     private final TokenTransactionRepository tokenTransactionRepository;
     private final AccountNameHelper accountNameHelper;
+    private final WhatsAppService whatsAppService;
 
     public List<Exchange> get(){
         return exchangeRepository.findAll();
@@ -341,6 +342,27 @@ public class ExchangeService {
             saveTokenTransaction(requester, exchange, amount, "REFUND", "Refund for cancelled exchange");
 
             exchange.setTokensReserved(false);
+            try {
+                String phone;
+                String name;
+                if (requester.getIndividualProfile() != null) {
+                    phone = requester.getIndividualProfile().getPhone();
+                    name = requester.getIndividualProfile().getName();
+                } else {
+                    phone = requester.getCompanyProfile().getPhone();
+                    name = requester.getCompanyProfile().getName();
+                }
+
+                whatsAppService.sendMessage(
+                        phone,
+                        "Hello " + name + " 👋\n\n" +
+                                "Your exchange #" + exchange.getId() + " has been cancelled.\n" +
+                                "✅ " + amount + " tokens have been refunded to your account.\n\n" +
+                                "Your current balance: " + (requester.getTokenBalance() + amount) + " tokens 💰"
+                );
+            } catch (Exception e) {
+                System.out.println("WhatsApp message failed: " + e.getMessage());
+            }
         }
 
         exchange.setStatus("CANCELLED");
@@ -349,6 +371,8 @@ public class ExchangeService {
         LearningRequest request = exchange.getLearningRequest();
         request.setStatus("CANCELLED");
         learningRequestRepository.save(request);
+
+
     }
 
     private Exchange getExchangeForAction(Integer accountId, Integer exchangeId) {
