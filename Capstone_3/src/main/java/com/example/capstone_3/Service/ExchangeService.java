@@ -200,8 +200,19 @@ public class ExchangeService {
 
         brevoEmailService.sendEmail(provider.getEmail(), subject, text);
 
-        //whatsapp
+        try {
+            String phone;
 
+            if (provider.getIndividualProfile() != null) {
+                phone = provider.getIndividualProfile().getPhone();
+            } else {
+                phone = provider.getCompanyProfile().getPhone();
+            }
+
+            whatsAppService.sendMessage(phone, text);
+        } catch (Exception e) {
+            System.out.println("WhatsApp message failed: " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -346,6 +357,20 @@ public class ExchangeService {
 
         brevoEmailService.sendEmail(requester.getEmail(), subject, text);
 
+        try {
+            String phone;
+
+            if (requester.getIndividualProfile() != null) {
+                phone = requester.getIndividualProfile().getPhone();
+            } else {
+                phone = requester.getCompanyProfile().getPhone();
+            }
+
+            whatsAppService.sendMessage(phone, text);
+        } catch (Exception e) {
+            System.out.println("WhatsApp message failed: " + e.getMessage());
+        }
+
     }
 
     @Transactional
@@ -427,6 +452,23 @@ public class ExchangeService {
         }
 
         brevoEmailService.sendEmail(recipient.getEmail(), subject, text);
+
+        try {
+            String phone;
+
+            if (recipient.getIndividualProfile() != null) {
+                phone = recipient.getIndividualProfile().getPhone();
+            } else {
+                phone = recipient.getCompanyProfile().getPhone();
+            }
+
+            if (!recipient.getId().equals(learner.getId()) || refundedTokens == 0) {
+                whatsAppService.sendMessage(phone, text);
+            }
+
+        } catch (Exception e) {
+            System.out.println("WhatsApp message failed: " + e.getMessage());
+        }
 
         if (cancelledBy.getId().equals(learner.getId())) {
             String refundText = "Hello " + accountNameHelper.getAccountName(learner)

@@ -67,6 +67,7 @@ public class AIService {
     private final HttpClient apifyHttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
 
     private String askAI(String prompt) {
+
         try {
             ChatCompletionCreateParams params = ChatCompletionCreateParams.builder().model(ChatModel.GPT_4O_MINI).addUserMessage(prompt).build();
             ChatCompletion completion = openAIClient.chat().completions().create(params);
